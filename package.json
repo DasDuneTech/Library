@@ -1,0 +1,19 @@
+{
+  "name": "dasdunetech-lib",
+  "version": "1.0.0",
+  "description": "dasdune tech library",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DasDuneTech/Library.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DasDuneTech/Library/issues"
+  },
+  "homepage": "https://github.com/DasDuneTech/Library#readme"
+}
