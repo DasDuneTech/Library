@@ -9,6 +9,8 @@ app.listen(port, () => {
 
 app.get('/', async (req, res) => {
 
+    let info = req.query
+
     res.send(`Hello word`)
 
 })
