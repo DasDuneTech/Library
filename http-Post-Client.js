@@ -1,19 +1,49 @@
 const fetch = require('node-fetch');
+const FormData = require('form-data');
 
-const postReq= async() => {
+//*Post request with JSON
+const postReqJSON= async() => {
 
-    let info = {firstName: `John`, lastName: `Doe`}
-    let url = `http://localhost:8080/post`
+    let data = {firstName: "John", lastName: "Doe"}
+    let url = `http://localhost:8080/hello`
 
     let res = await fetch(url, 
         {
-        method: 'POST',    
-        body: JSON.stringify(info)
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+            },
+        body: JSON.stringify(data)
     });
-    let res2  = await res.json()
+    
+    let res2  = await res.text()
 
     console.log(res2)
 
 }
 
-postInfo()
+//*Post request with FormData
+const postReqFormData= async() => {
+
+    const formData2 = new FormData();
+    formData2.append('firstName', 'John');
+    formData2.append('lasttName', 'Doe');
+
+    let url = `http://localhost:8080/hello`
+
+    let res = await fetch(url, 
+        {
+        method: 'POST',
+        body: formData2
+    });
+    
+    let res2  = await res.text()
+
+    console.log(res2)
+
+}
+
+
+// postReqJSON()
+
+postReqFormData()

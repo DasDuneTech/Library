@@ -18,4 +18,6 @@ const hello2 = async() => {
 
 }
 
-hello2()
+hello()
+
+// hello2()

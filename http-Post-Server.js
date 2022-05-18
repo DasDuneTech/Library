@@ -1,19 +1,38 @@
 // * Basic HTTP Post server
 const express = require('express');
 const app = express();
+
 const port = 8080;
 
 app.listen(port, () => {
-    console.log(`TagLinker listening at port ${port}`);
+    console.log(`Server listening at port ${port}`);
 });
+
+//* JSON parsing
+app.use(express.json({ limit: '50mb' }));
+
+//*FormData parsing ?
+const multer = require('multer');
+const upload = multer();
+
+// for parsing multipart/form-data
+app.use(upload.array()); 
+
+
+
+
 
 app.post('/hello', async (req, res) => {
 
-    let info = req.body
-
-    let firstName = info.firstName
-    let lastName = info.lastName
-
-    res.send(`Hello ${firstName} ${lastName}`)
+    try{
+        const {firstName, lastName} = req.body
+        res.send(`Hello ${firstName} ${lastName}`)
+    }
+    catch(err){
+        res.send(`error :: ${err.message}`)
+        return
+    }
 
 })
+
+
