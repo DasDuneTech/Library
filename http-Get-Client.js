@@ -1,12 +1,5 @@
 const fetch = require('node-fetch');
 
-
-
-
-
-
-
-
 const hello = async() => {
 
     const res = await fetch(`http://localhost:8080/hello`)
@@ -16,7 +9,6 @@ const hello = async() => {
 
 }
 
-
 const hello2 = async() => {
 
     const res = await fetch(`http://localhost:8080/hello2/?firstName=John&lastName=Doe`)
@@ -25,7 +17,5 @@ const hello2 = async() => {
     console.log(res2)
 
 }
-
-
 
 hello2()

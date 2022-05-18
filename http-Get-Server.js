@@ -1,4 +1,4 @@
-// * Basic node js REST application 
+// * Basic HTTP Get server
 const express = require('express');
 const app = express();
 const port = 8080;
@@ -15,14 +15,9 @@ app.get('/hello', async (req, res) => {
 
 })
 
-
-
 app.get('/hello2', async (req, res) => {
 
     let info = req.query
-
-    let firstName = 'unknown'
-    let lastName = 'unknown'
 
     firstName = req.query.firstName
     lastName = req.query.lastName
