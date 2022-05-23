@@ -13,7 +13,7 @@ const fs = require('fs');
 //environement varialbles handler
 require('dotenv').config()
 
-//* MS authorization Oauth 2.0 process flow
+//* Google authorization Oauth 2.0 process flow
 //* 1. The user send a HTTP request to /codeMicrosoft endpoint
 //* 2. The function will send its information to Microsoft for authentication
 
