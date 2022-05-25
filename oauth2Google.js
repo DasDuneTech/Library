@@ -9,7 +9,7 @@ app.listen(port, () => {
     console.log(`Server listening at port ${port}`);
 });
 
-const {codeRequest, refreshToken} = require(`./oauth2GoogleFunctions`)
+const {codeRequest, refreshToken} = require(`./GoogleLib`)
 
 //* 1. The user send a HTTP request to /oauth2Google endpoint
 //* 2. The function will send its information to Google for authentication
