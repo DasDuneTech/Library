@@ -1,20 +1,38 @@
 const {accessToken} = require(`./GoogleLib`)
 const fetch = require('node-fetch');
 
-sheetRange = async() => {
+let token = ``
 
-    //get an access token
-    let token = await accessToken()
-    console.log(token)
-
-    //Get the column values
-    url = `https://sheets.googleapis.com/v4/spreadsheets/1TIQfrcPM15l_4NIjDOz7MMe3EtHfIR8_aST4YD-PEY4/values/A1%3AJ9`
+getGoogleInfo = async(url) => {
 
     res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
-    let range  = await res.json()
-
-    return range
+    let info  = await res.json()
+    return(info)
 
 }
 
-sheetRange()
+urlGetSheetRangeValues = `https://sheets.googleapis.com/v4/spreadsheets/1TIQfrcPM15l_4NIjDOz7MMe3EtHfIR8_aST4YD-PEY4/values/Library`
+urlGetFilesList = `https://www.googleapis.com/drive/v3/files`
+urlGetSheetsList = `https://www.googleapis.com/drive/v3/files?q=mimeType: "application/vnd.google-apps.spreadsheet"`
+
+main = (async() => {
+    
+    token = await accessToken()
+    
+    //get sheet range values
+    let info = await getGoogleInfo(urlGetSheetRangeValues)
+    console.log(info)
+
+     //get files list
+    info = await getGoogleInfo(urlGetFilesList)
+    console.log(info)
+
+    //get sheets list
+    info = await getGoogleInfo(urlGetSheetsList)
+    console.log(info)
+
+})()
+
+
+
+

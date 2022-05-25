@@ -15,9 +15,9 @@ const {codeRequest, refreshToken} = require(`./GoogleLib`)
 //* 2. The function will send its information to Google for authentication
 //* 3. The scope is Google Sheets read/write access
 
-app.get('/oauth2Google', (req, res) => {
+app.get('/oauth2Google', async(req, res) => {
 
-    let url = codeRequest()
+    let url = await codeRequest()
     res.redirect(url);
 
 });
@@ -43,7 +43,7 @@ app.get('/oauth2GoogleCallback', async(req, res) => {
         res.send(`error : Cannot exchange the access code for a refresh token`);
     } 
     else {
-        fs.writeFileSync('oauth2RefreshTokenGoogle.txt', tokenInfo.refresh_token)
+        fs.writeFileSync('oauth2GoogleRefreshToken.txt', tokenInfo.refresh_token)
         res.send(`thanks user to trust our app.`);
     }
 });

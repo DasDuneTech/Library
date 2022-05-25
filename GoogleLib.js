@@ -8,7 +8,7 @@ const appId = process.env.GOOGLE_OAUTH2_APP_ID
 const secret = process.env.GOOGLE_OAUTH2_APP_SECRET
 
 const oauth2Url = `https://accounts.google.com/o/oauth2/v2/auth`
-const scope= [`https://www.googleapis.com/auth/spreadsheets`]
+const scope= [`https://www.googleapis.com/auth/spreadsheets%20https://www.googleapis.com/auth/drive`]
 appUri = `http://localhost:8080/oauth2GoogleCallback`
 refreshTokenUrl = `https://oauth2.googleapis.com/token`
 
@@ -30,6 +30,8 @@ const refreshToken = async(tokenInfo) => {
 
     const {code, rToken} = tokenInfo
 
+    if (code === undefined && rToken === undefined) return(`cannot refresh token`)
+
     const formData2 = new FormData();
     formData2.append('client_id', appId);
 
@@ -39,7 +41,7 @@ const refreshToken = async(tokenInfo) => {
         formData2.append('grant_type', 'authorization_code');
         formData2.append('code', code);
     }
-    else{
+    if (rToken !== undefined) {
         formData2.append('grant_type', 'refresh_token');
         formData2.append('refresh_token', rToken);
         formData2.append('client_secret', secret);
