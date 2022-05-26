@@ -11,7 +11,7 @@ app.listen(port, () => {
 
 const {codeRequest, refreshToken} = require(`./GoogleLib`)
 
-//* 1. The user send a HTTP request to /oauth2Google endpoint
+//* 1. The user invoke a HTTP request to /oauth2Google endpoint
 //* 2. The function will send its information to Google for authentication
 //* 3. The scope is Google Sheets read/write access
 
