@@ -12,6 +12,10 @@ const scope= [`https://www.googleapis.com/auth/spreadsheets%20https://www.google
 appUri = `http://localhost:8080/oauth2GoogleCallback`
 refreshTokenUrl = `https://oauth2.googleapis.com/token`
 
+let token
+let sheetsList
+let cacheSheet = []
+
 //access code request
 const codeRequest = async() =>{
 
@@ -68,8 +72,150 @@ const accessToken = async() => {
 
     const rToken = fs.readFileSync('oauth2GoogleRefreshToken.txt', 'utf8') 
     let tokenInfo = await refreshToken({rToken:rToken})
+    token = tokenInfo.access_token
     return(tokenInfo.access_token)
 
 }
 
-module.exports = { codeRequest, accessToken, refreshToken }
+//get all files list from Google Drive
+const getFilesList = async() => {
+    
+    let url = `https://www.googleapis.com/drive/v3/files`
+    res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+    let info  = await res.json()
+    return(info)
+
+}
+
+//get sheets list from Google Sheets, save to file and load to memory
+const getSheetsList = async() => {
+
+    let url = `https://www.googleapis.com/drive/v3/files?q=mimeType: "application/vnd.google-apps.spreadsheet"`
+    res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+    let info  = await res.json()
+    fs.writeFileSync(`sheetsList.txt`, JSON.stringify(info.files), (err) => {
+        if (err) console.log(err.message);
+    });
+    sheetsList = info.files
+    return(info)
+}
+
+//get sheets Id from sheets name    
+const getSheetId = async(sheetsName) => {
+
+    if (sheetsList === undefined) await getSheetsList()
+    let sheetId = ``    
+    sheetsList.map((item) => {if (item.name === sheetsName) sheetId = item.id})
+    if (sheetId === ``) {
+        //refresh the lists and try a second time
+        await saveSheetsList()
+        await loadSheetsList()
+        sheetsList.map((item) => {if (item.name === `Library`) sheetId = item.id})
+        if (sheetId = ``) return(`cannot find the sheet Id for ${sheetName}`)
+    }
+    else return(sheetId)
+}
+
+//get sheet info from Google sheets
+getSheetInfo = async(sheetInfo) => {
+
+    const {sheetsName, sheetName, range, isFormulas} = sheetInfo
+    const sheetsId = await getSheetId(sheetsName)
+
+    range2 = range === undefined ? `` : `!${range}`
+    formulas = isFormulas ? `?valueRenderOption=FORMULA` : ``
+
+    let url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsId}/values/${sheetName}${range2}${formulas}`
+    let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+    let info  = await res.json()
+
+    let index = -1
+   
+    //create/update cache
+    cacheSheet.map((o, i) => { if (Object.keys(o)[0] == `${sheetsName}-${sheetName}`) index = i })
+    if (index === -1) {
+        let obj = {}
+        obj[`${sheetsName}-${sheetName}`] = info.values
+        cacheSheet.push(obj)
+    }
+    else cacheSheet[index][`${sheetsName}-${sheetName}`] = info.values
+
+    return(info)
+
+}
+
+//get sheet info from cache
+const getInfo = async(sheetInfo) => {
+
+    const {sheetsName, sheetName, range} = sheetInfo
+    let index = -1
+
+    //get values from cache or from Google Sheets
+    cacheSheet.map((o, i) => { if (Object.keys(o)[0] == `${sheetsName}-${sheetName}`) index = i })
+    let info = index === -1 ? await getSheetInfo(sheetInfo) : cacheSheet[index][`${sheetsName}-${sheetName}`]
+    return(info.values)
+
+}
+
+//update sheet
+const update = async(sheetInfo) => {
+
+    const {sheetsName, sheetName, range, payload} = sheetInfo
+    const sheetsId = await getSheetId(sheetsName)
+
+    range2 = range === undefined ? `` : `!${range}`
+    payloadObj = {values:payload}
+    
+    url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsId}/values/${sheetName}${range2}?valueInputOption=USER_ENTERED`
+
+    let res = await fetch(url, 
+        {
+        method: 'PUT',    
+        headers: {
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payloadObj)
+    });
+    info = await res.json()
+    return(info)
+}
+
+//batch update spreadsheet
+const batchUpdate = async(sheetInfo) => {
+
+    const {sheetsName, payload} = sheetInfo
+    const sheetsId = await getSheetId(sheetsName)
+
+    let payloadObj = {valueInputOption: "USER_ENTERED"}
+    let arrObj = []
+    payload.map((item) => arrObj.push({range:item[0], values:[[item[[1]]]]}))
+    payloadObj = {...payloadObj, ...{data:arrObj}}
+    
+
+    url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsId}/values:batchUpdate`
+
+    let res = await fetch(url, 
+        {
+        method: 'POST',    
+        headers: {
+        Authorization: 'Bearer ' + token,
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payloadObj)
+    });
+    resInfo  = await res.json()
+    console.log(resInfo)
+
+}
+
+init = (async() => {
+
+    //set the sheets info list
+    let info = await accessToken()
+    info = await getSheetsList()
+    console.log(`Sheets Library Initialization complete`)
+
+})()
+
+module.exports = { accessToken, getFilesList, getSheetsList, getInfo, update, batchUpdate }
