@@ -13,8 +13,9 @@ appUri = `http://localhost:8080/oauth2GoogleCallback`
 refreshTokenUrl = `https://oauth2.googleapis.com/token`
 
 let token
-let sheetsList
+let spreadsheetsList
 let cacheSheet = []
+
 
 //access code request
 const codeRequest = async() =>{
@@ -29,7 +30,9 @@ const codeRequest = async() =>{
     return(url)
 }
 
-// refresh token from code/refresh token
+
+
+//refresh token from code/refresh token
 const refreshToken = async(tokenInfo) => {
 
     const {code, rToken} = tokenInfo
@@ -68,6 +71,7 @@ const refreshToken = async(tokenInfo) => {
     return(infoToken)
 }
 
+
 const accessToken = async() => {
 
     const rToken = fs.readFileSync('oauth2GoogleRefreshToken.txt', 'utf8') 
@@ -76,6 +80,7 @@ const accessToken = async() => {
     return(tokenInfo.access_token)
 
 }
+
 
 //get all files list from Google Drive
 const getFilesList = async() => {
@@ -87,40 +92,61 @@ const getFilesList = async() => {
 
 }
 
-//get sheets list from Google Sheets, save to file and load to memory
-const getSheetsList = async() => {
+//get spreadsheets list from Google Sheets, save to file and load to memory
+const getSpreadsheetsList = async() => {
 
     let url = `https://www.googleapis.com/drive/v3/files?q=mimeType: "application/vnd.google-apps.spreadsheet"`
     res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
     let info  = await res.json()
-    fs.writeFileSync(`sheetsList.txt`, JSON.stringify(info.files), (err) => {
+    fs.writeFileSync(`spreadsheetsList.txt`, JSON.stringify(info.files), (err) => {
         if (err) console.log(err.message);
     });
-    sheetsList = info.files
+    spreadsheetsList = info.files
     return(info)
 }
 
-//get sheets Id from sheets name    
-const getSheetId = async(sheetsName) => {
 
-    if (sheetsList === undefined) await getSheetsList()
-    let sheetId = ``    
-    sheetsList.map((item) => {if (item.name === sheetsName) sheetId = item.id})
-    if (sheetId === ``) {
-        //refresh the lists and try a second time
-        await saveSheetsList()
-        await loadSheetsList()
-        sheetsList.map((item) => {if (item.name === `Library`) sheetId = item.id})
-        if (sheetId = ``) return(`cannot find the sheet Id for ${sheetName}`)
-    }
-    else return(sheetId)
+
+//get sheets list from spreadsheet
+const getSheetsList = async(spreadsheetName) => {
+
+    let spreadsheetId = ``    
+    spreadsheetsList.map((item) => {if (item.name === spreadsheetName) spreadsheetId = item.id})
+    if (spreadsheetId === ``) return(`cannot find the sheets Id`)
+
+    let url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}`
+    res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+    let info  = await res.json()
+    return(info)
 }
 
-//get sheet info from Google sheets
+
+
+//get spreadsheet Id from spreadsheet name    
+const getSpreadsheetId = async(spreadsheetName) => {
+
+    if (spreadsheetsList === undefined) await getSpreadsheetsList()
+    let spreadsheetId = ``    
+    spreadsheetsList.map((item) => {if (item.name === spreadsheetName) spreadsheetId = item.id})
+    if (spreadsheetId === ``) {
+        //refresh the lists and try a second time
+        await saveSpreadsheetsList()
+        await loadSpreadsheetsList()
+        spreadsheetsList.map((item) => {if (item.name === `Library`) spreadsheetId = item.id})
+        if (spreadsheetId = ``) return(`cannot find the sheet Id for ${sheetName}`)
+        else return(spreadsheetId)
+    }
+    else return(spreadsheetId)
+}
+
+
+
+
+//get sheet info from Google sheets (values or formulas)
 getSheetInfo = async(sheetInfo) => {
 
-    const {sheetsName, sheetName, range, isFormulas} = sheetInfo
-    const sheetsId = await getSheetId(sheetsName)
+    const {spreadsheetName, sheetName, range, isFormulas} = sheetInfo
+    const sheetsId = await getSpreadsheetId(spreadsheetName)
 
     range2 = range === undefined ? `` : `!${range}`
     formulas = isFormulas ? `?valueRenderOption=FORMULA` : ``
@@ -132,36 +158,40 @@ getSheetInfo = async(sheetInfo) => {
     let index = -1
    
     //create/update cache
-    cacheSheet.map((o, i) => { if (Object.keys(o)[0] == `${sheetsName}-${sheetName}`) index = i })
+    cacheSheet.map((o, i) => { if (Object.keys(o)[0] == `${spreadsheetName}-${sheetName}`) index = i })
     if (index === -1) {
         let obj = {}
-        obj[`${sheetsName}-${sheetName}`] = info.values
+        obj[`${spreadsheetName}-${sheetName}`] = info.values
         cacheSheet.push(obj)
     }
-    else cacheSheet[index][`${sheetsName}-${sheetName}`] = info.values
+    else cacheSheet[index][`${spreadsheetName}-${sheetName}`] = info.values
 
-    return(info)
-
-}
-
-//get sheet info from cache
-const getInfo = async(sheetInfo) => {
-
-    const {sheetsName, sheetName, range} = sheetInfo
-    let index = -1
-
-    //get values from cache or from Google Sheets
-    cacheSheet.map((o, i) => { if (Object.keys(o)[0] == `${sheetsName}-${sheetName}`) index = i })
-    let info = index === -1 ? await getSheetInfo(sheetInfo) : cacheSheet[index][`${sheetsName}-${sheetName}`]
     return(info.values)
 
 }
 
+
+
+//get sheet info from cache or sheets
+const getInfo = async(sheetInfo) => {
+
+    const {spreadsheetName, sheetName, range} = sheetInfo
+    let index = -1
+
+    //get values from cache or from Google Sheets
+    cacheSheet.map((o, i) => { if (Object.keys(o)[0] == `${spreadsheetName}-${sheetName}`) index = i })
+    let info = index === -1 ? await getSheetInfo(sheetInfo) : cacheSheet[index][`${spreadsheetName}-${sheetName}`]
+    return(info)
+
+}
+
+
+
 //update sheet
 const update = async(sheetInfo) => {
 
-    const {sheetsName, sheetName, range, payload} = sheetInfo
-    const sheetsId = await getSheetId(sheetsName)
+    const {spreadsheetName, sheetName, range, payload} = sheetInfo
+    const sheetsId = await getSpreadsheetId(spreadsheetName)
 
     range2 = range === undefined ? `` : `!${range}`
     payloadObj = {values:payload}
@@ -181,11 +211,12 @@ const update = async(sheetInfo) => {
     return(info)
 }
 
+
 //batch update spreadsheet
 const batchUpdate = async(sheetInfo) => {
 
-    const {sheetsName, payload} = sheetInfo
-    const sheetsId = await getSheetId(sheetsName)
+    const {spreadsheetName, payload} = sheetInfo
+    const sheetsId = await getSheetId(spreadsheetName)
 
     let payloadObj = {valueInputOption: "USER_ENTERED"}
     let arrObj = []
@@ -209,13 +240,70 @@ const batchUpdate = async(sheetInfo) => {
 
 }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 init = (async() => {
 
     //set the sheets info list
     let info = await accessToken()
-    info = await getSheetsList()
+    info = await getSpreadsheetsList()
     console.log(`Sheets Library Initialization complete`)
 
 })()
 
-module.exports = { accessToken, getFilesList, getSheetsList, getInfo, update, batchUpdate }
+module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getSpreadsheetsList, getSheetsList, getInfo, update, batchUpdate }

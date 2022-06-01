@@ -29,7 +29,7 @@ const postReqFormData= async() => {
     formData2.append('firstName', 'John');
     formData2.append('lasttName', 'Doe');
 
-    let url = `http://localhost:8080/hello`
+    let url = `http://localhost:8080/hello3`
 
     let res = await fetch(url, 
         {
