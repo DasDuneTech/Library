@@ -107,8 +107,8 @@ const getSpreadsheetsList = async() => {
 
 
 
-//get sheets list from spreadsheet
-const getSheetsList = async(spreadsheetName) => {
+//get spreadsheet info and its sheets info
+const getSpreadsheetInfo = async(spreadsheetName) => {
 
     let spreadsheetId = ``    
     spreadsheetsList.map((item) => {if (item.name === spreadsheetName) spreadsheetId = item.id})
@@ -306,4 +306,4 @@ init = (async() => {
 
 })()
 
-module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getSpreadsheetsList, getSheetsList, getInfo, update, batchUpdate }
+module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getSpreadsheetsList, getSpreadsheetInfo, getInfo, update, batchUpdate }

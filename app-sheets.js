@@ -19,7 +19,7 @@ const upload = multer();
 app.use(upload.array()); 
 
 //Google Sheets Functions library
-const {codeRequest, refreshToken, accessToken, getFilesList, getSpreadsheetsList, getSheetsList, getInfo, update, batchUpdate} = require(`./GoogleLib`)
+const {codeRequest, refreshToken, accessToken, getFilesList, getSpreadsheetsList, getSpreadsheetInfo, getInfo, update, batchUpdate} = require(`./GoogleLib`)
 
 
 //http get response 
@@ -118,10 +118,10 @@ app.get('/getSpreadsheetsList', async (req, res) => {
  })
 
 //get sheets details for a given spreadsheet
- app.get('/getSheetsList', async (req, res) => {
+ app.get('/getSpreadsheetInfo', async (req, res) => {
 
    await accessToken() 
-   let info =  await getSheetsList(`Library`)
+   let info =  await getSpreadsheetInfo(`Library`)
    console.log(info.sheets)
    res.send(info.sheets)
 
