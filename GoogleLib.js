@@ -32,6 +32,11 @@ const codeRequest = async() =>{
 
 
 
+
+
+
+
+
 //refresh token from code/refresh token
 const refreshToken = async(tokenInfo) => {
 
@@ -72,6 +77,16 @@ const refreshToken = async(tokenInfo) => {
 }
 
 
+
+
+
+
+
+
+
+
+
+
 const accessToken = async() => {
 
     const rToken = fs.readFileSync('oauth2GoogleRefreshToken.txt', 'utf8') 
@@ -80,6 +95,16 @@ const accessToken = async() => {
     return(tokenInfo.access_token)
 
 }
+
+
+
+
+
+
+
+
+
+
 
 
 //get all files list from Google Drive
@@ -91,6 +116,16 @@ const getFilesList = async() => {
     return(info)
 
 }
+
+
+
+
+
+
+
+
+
+
 
 //get spreadsheets list from Google Sheets, save to file and load to memory
 const getSpreadsheetsList = async() => {
@@ -107,6 +142,11 @@ const getSpreadsheetsList = async() => {
 
 
 
+
+
+
+
+
 //get spreadsheet info and its sheets info
 const getSpreadsheetInfo = async(spreadsheetName) => {
 
@@ -119,6 +159,11 @@ const getSpreadsheetInfo = async(spreadsheetName) => {
     let info  = await res.json()
     return(info)
 }
+
+
+
+
+
 
 
 
@@ -138,6 +183,16 @@ const getSpreadsheetId = async(spreadsheetName) => {
     }
     else return(spreadsheetId)
 }
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -172,6 +227,16 @@ getSheetInfo = async(sheetInfo) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
 //get sheet info from cache or sheets
 const getInfo = async(sheetInfo) => {
 
@@ -184,6 +249,11 @@ const getInfo = async(sheetInfo) => {
     return(info)
 
 }
+
+
+
+
+
 
 
 
@@ -210,6 +280,11 @@ const update = async(sheetInfo) => {
     info = await res.json()
     return(info)
 }
+
+
+
+
+
 
 
 //batch update spreadsheet
