@@ -122,8 +122,8 @@ app.get('/getSpreadsheetsList', async (req, res) => {
 
    await accessToken() 
    let info =  await getSpreadsheetInfo(`Library`)
-   console.log(info.sheets)
-   res.send(info.sheets)
+   if (typeof info !== 'object') res.send(info)
+   else res.send(info.sheets)
 
 })
 
@@ -142,7 +142,7 @@ app.get('/getSpreadsheetsList', async (req, res) => {
  app.get('/update', async (req, res) => {
 
     await accessToken() 
-    let payload = [[777],["=HYPERLINK(\"https://dasdunetech.com/library/Google.html\",\"Google API\")"]]
+    let payload = [[666],["=HYPERLINK(\"https://dasdunetech.com/library/Google.html\",\"Google API\")"]]
     let range = `B3:B4`
     let spreadsheetInfo = {spreadsheetName:`Library`, sheetName:`Library`, range:range, payload:payload}
     let info = await update(spreadsheetInfo)
@@ -156,7 +156,7 @@ app.get('/getSpreadsheetsList', async (req, res) => {
 
     await accessToken() 
     let payload = [["Library!C4:C4", 888],["Sheet2!D4:D4", 889],["Library!E4:E4", 887]]
-    let sheetsInfo = {sheetsName:`Library`, payload:payload}
+    let sheetsInfo = {spreadsheetName:`Library`, payload:payload}
     let info = await batchUpdate(sheetsInfo)
     console.log(info)
     res.send(info)

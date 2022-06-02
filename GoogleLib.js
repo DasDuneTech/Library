@@ -32,11 +32,6 @@ const codeRequest = async() =>{
 
 
 
-
-
-
-
-
 //refresh token from code/refresh token
 const refreshToken = async(tokenInfo) => {
 
@@ -61,137 +56,147 @@ const refreshToken = async(tokenInfo) => {
 
     let url = `${refreshTokenUrl}`
 
-    let res = await fetch(url, 
-        {
-        method: 'POST',    
-        body: formData2
-    });
-    
-    let infoToken  = await res.json()
+    try {
 
-    let info =`refreshToken ::\n\t`
-    for (const [key, val] of Object.entries(infoToken)) info += `${key}: ${val}\n\t`
-    console.log(info)
+        let res = await fetch(url, 
+            {
+            method: 'POST',    
+            body: formData2
+        });
+        
+        if (!res.ok) {
+            console.log((`refresh token http request error :: code:${res.status} - ${res.statusText}`))
+            return(`refresh token http request error :: code:${res.status} - ${res.statusText}`)
+        }   
+        else {
+             let info  = await res.json()
+             return(info)
+            }
+    }
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
 
-    return(infoToken)
 }
-
-
-
-
-
-
-
-
-
 
 
 
 const accessToken = async() => {
 
-    const rToken = fs.readFileSync('oauth2GoogleRefreshToken.txt', 'utf8') 
-    let tokenInfo = await refreshToken({rToken:rToken})
-    token = tokenInfo.access_token
-    return(tokenInfo.access_token)
+    try {
+
+        const rToken = fs.readFileSync('oauth2GoogleRefreshToken.txt', 'utf8') 
+        let tokenInfo = await refreshToken({rToken:rToken})
+        token = tokenInfo.access_token
+        return(tokenInfo.access_token)
+
+    }
+    catch(err) {console.log(err.message)}
 
 }
-
-
-
-
-
-
-
-
-
-
 
 
 //get all files list from Google Drive
 const getFilesList = async() => {
     
     let url = `https://www.googleapis.com/drive/v3/files`
-    res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
-    let info  = await res.json()
-    return(info)
+
+    try {
+
+        res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+        if (!res.ok) {
+            console.log((`getFilesList http request error :: code:${res.status} - ${res.statusText}`))
+            return(`getFilesList http request error :: code:${res.status} - ${res.statusText}`)
+        }   
+        else {
+             let info  = await res.json()
+             return(info)
+            }
+    }
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
 
 }
-
-
-
-
-
-
-
-
-
 
 
 //get spreadsheets list from Google Sheets, save to file and load to memory
 const getSpreadsheetsList = async() => {
 
     let url = `https://www.googleapis.com/drive/v3/files?q=mimeType: "application/vnd.google-apps.spreadsheet"`
-    res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
-    let info  = await res.json()
-    fs.writeFileSync(`spreadsheetsList.txt`, JSON.stringify(info.files), (err) => {
-        if (err) console.log(err.message);
-    });
-    spreadsheetsList = info.files
-    return(info)
+
+    try {
+
+        res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+
+        if (!res.ok) {
+            console.log((`getSpreadsheetsList http request error :: code:${res.status} - ${res.statusText}`))
+            return(`getSpreadsheetsList http request error :: code:${res.status} - ${res.statusText}`)
+        } 
+        else {
+            let info  = await res.json()
+            fs.writeFileSync(`spreadsheetsList.txt`, JSON.stringify(info.files), (err) => {
+                if (err) console.log(err.message);
+            });
+            spreadsheetsList = info.files
+            return(info)
+        }
+
+    }
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
 }
-
-
-
-
-
-
 
 
 //get spreadsheet info and its sheets info
 const getSpreadsheetInfo = async(spreadsheetName) => {
 
     let spreadsheetId = ``    
-    spreadsheetsList.map((item) => {if (item.name === spreadsheetName) spreadsheetId = item.id})
-    if (spreadsheetId === ``) return(`cannot find the sheets Id`)
 
-    let url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}`
-    res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
-    let info  = await res.json()
-    return(info)
+    try {
+
+        spreadsheetsList.map((item) => {if (item.name === spreadsheetName) spreadsheetId = item.id})
+        if (spreadsheetId === ``) return(`cannot find the sheets Id`)
+
+        let url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}`
+
+        res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+
+        if (!res.ok) {
+            console.log((`getSpreadsheetInfo http request error :: code:${res.status} - ${res.statusText}`))
+            return(`getSpreadsheetInfo http request error :: code:${res.status} - ${res.statusText}`)
+        } 
+        else {
+            let info  = await res.json()
+            return(info)
+        }
+    
+    }
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
 }
-
-
-
-
-
-
-
 
 //get spreadsheet Id from spreadsheet name    
 const getSpreadsheetId = async(spreadsheetName) => {
 
-    if (spreadsheetsList === undefined) await getSpreadsheetsList()
-    let spreadsheetId = ``    
-    spreadsheetsList.map((item) => {if (item.name === spreadsheetName) spreadsheetId = item.id})
-    if (spreadsheetId === ``) {
-        //refresh the lists and try a second time
-        await saveSpreadsheetsList()
-        await loadSpreadsheetsList()
-        spreadsheetsList.map((item) => {if (item.name === `Library`) spreadsheetId = item.id})
-        if (spreadsheetId = ``) return(`cannot find the sheet Id for ${sheetName}`)
-        else return(spreadsheetId)
+    try {
+
+        if (spreadsheetsList === undefined) await getSpreadsheetsList()
+        let spreadsheetId = ``    
+        spreadsheetsList.map((item) => {if (item.name === spreadsheetName) spreadsheetId = item.id})
+        return(spreadsheetId)
     }
-    else return(spreadsheetId)
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
 }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -201,39 +206,44 @@ const getSpreadsheetId = async(spreadsheetName) => {
 getSheetInfo = async(sheetInfo) => {
 
     const {spreadsheetName, sheetName, range, isFormulas} = sheetInfo
-    const sheetsId = await getSpreadsheetId(spreadsheetName)
 
-    range2 = range === undefined ? `` : `!${range}`
-    formulas = isFormulas ? `?valueRenderOption=FORMULA` : ``
+    try {
 
-    let url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsId}/values/${sheetName}${range2}${formulas}`
-    let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
-    let info  = await res.json()
+        const sheetsId = await getSpreadsheetId(spreadsheetName)
 
-    let index = -1
-   
-    //create/update cache
-    cacheSheet.map((o, i) => { if (Object.keys(o)[0] == `${spreadsheetName}-${sheetName}`) index = i })
-    if (index === -1) {
-        let obj = {}
-        obj[`${spreadsheetName}-${sheetName}`] = info.values
-        cacheSheet.push(obj)
+        range2 = range === undefined ? `` : `!${range}`
+        formulas = isFormulas ? `?valueRenderOption=FORMULA` : ``
+
+        let url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsId}/values/${sheetName}${range2}${formulas}`
+        let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+
+        if (!res.ok) {
+            console.log((`getSheetInfo http request error :: code:${res.status} - ${res.statusText}`))
+            return(`getSheetInfo http request error :: code:${res.status} - ${res.statusText}`)
+        } 
+        else {
+
+            let info  = await res.json()
+
+            let index = -1
+        
+            //create/update cache
+            cacheSheet.map((o, i) => { if (Object.keys(o)[0] == `${spreadsheetName}-${sheetName}`) index = i })
+            if (index === -1) {
+                let obj = {}
+                obj[`${spreadsheetName}-${sheetName}`] = info.values
+                cacheSheet.push(obj)
+            }
+            else cacheSheet[index][`${spreadsheetName}-${sheetName}`] = info.values
+
+            return(info.values)
+        }
     }
-    else cacheSheet[index][`${spreadsheetName}-${sheetName}`] = info.values
-
-    return(info.values)
-
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -243,17 +253,19 @@ const getInfo = async(sheetInfo) => {
     const {spreadsheetName, sheetName, range} = sheetInfo
     let index = -1
 
-    //get values from cache or from Google Sheets
-    cacheSheet.map((o, i) => { if (Object.keys(o)[0] == `${spreadsheetName}-${sheetName}`) index = i })
-    let info = index === -1 ? await getSheetInfo(sheetInfo) : cacheSheet[index][`${spreadsheetName}-${sheetName}`]
-    return(info)
+    try {
 
+        //get values from cache or from Google Sheets
+        cacheSheet.map((o, i) => { if (Object.keys(o)[0] == `${spreadsheetName}-${sheetName}`) index = i })
+        let info = index === -1 ? await getSheetInfo(sheetInfo) : cacheSheet[index][`${spreadsheetName}-${sheetName}`]
+        return(info)
+
+    }
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
 }
-
-
-
-
-
 
 
 
@@ -261,57 +273,81 @@ const getInfo = async(sheetInfo) => {
 const update = async(sheetInfo) => {
 
     const {spreadsheetName, sheetName, range, payload} = sheetInfo
-    const sheetsId = await getSpreadsheetId(spreadsheetName)
 
-    range2 = range === undefined ? `` : `!${range}`
-    payloadObj = {values:payload}
-    
-    url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsId}/values/${sheetName}${range2}?valueInputOption=USER_ENTERED`
+    try {
 
-    let res = await fetch(url, 
-        {
-        method: 'PUT',    
-        headers: {
-        Authorization: 'Bearer ' + token,
-        'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payloadObj)
-    });
-    info = await res.json()
-    return(info)
+        const sheetsId = await getSpreadsheetId(spreadsheetName)
+
+        range2 = range === undefined ? `` : `!${range}`
+        payloadObj = {values:payload}
+        
+        url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsId}/values/${sheetName}${range2}?includeValuesInResponse=true&valueInputOption=USER_ENTERED`
+
+        let res = await fetch(url, 
+            {
+            method: 'PUT',    
+            headers: {
+            Authorization: 'Bearer ' + token,
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payloadObj)
+        });
+
+        if (!res.ok) {
+            console.log((`update http request error :: code:${res.status} - ${res.statusText}`))
+            return(`update http request error :: code:${res.status} - ${res.statusText}`)
+        } 
+        else {
+            info = await res.json()
+            return(info)
+        }
+    }
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
 }
-
-
-
-
-
 
 
 //batch update spreadsheet
 const batchUpdate = async(sheetInfo) => {
 
     const {spreadsheetName, payload} = sheetInfo
-    const sheetsId = await getSheetId(spreadsheetName)
 
-    let payloadObj = {valueInputOption: "USER_ENTERED"}
-    let arrObj = []
-    payload.map((item) => arrObj.push({range:item[0], values:[[item[[1]]]]}))
-    payloadObj = {...payloadObj, ...{data:arrObj}}
-    
+    try {
 
-    url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsId}/values:batchUpdate`
+        const sheetsId = await getSpreadsheetId(spreadsheetName)
 
-    let res = await fetch(url, 
-        {
-        method: 'POST',    
-        headers: {
-        Authorization: 'Bearer ' + token,
-        'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(payloadObj)
-    });
-    resInfo  = await res.json()
-    console.log(resInfo)
+        let payloadObj = {valueInputOption: "USER_ENTERED", includeValuesInResponse: true}
+        let arrObj = []
+        payload.map((item) => arrObj.push({range:item[0], values:[[item[[1]]]]}))
+        payloadObj = {...payloadObj, ...{data:arrObj}}
+        
+        url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsId}/values:batchUpdate`
+
+        let res = await fetch(url, 
+            {
+            method: 'POST',    
+            headers: {
+            Authorization: 'Bearer ' + token,
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payloadObj)
+        });
+
+        if (!res.ok) {
+            console.log((`batch update http request error :: code:${res.status} - ${res.statusText}`))
+            return(`batch update http request error :: code:${res.status} - ${res.statusText}`)
+        } 
+        else {
+            info  = await res.json()
+            return(info)
+        }
+    }
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
 
 }
 
@@ -375,9 +411,16 @@ const batchUpdate = async(sheetInfo) => {
 init = (async() => {
 
     //set the sheets info list
-    let info = await accessToken()
-    info = await getSpreadsheetsList()
-    console.log(`Sheets Library Initialization complete`)
+
+    try {
+
+        let info = await accessToken()
+        info = await getSpreadsheetsList()
+        if (typeof info === 'object') console.log(`GoogleLib::init : completed`)
+        else console.log(`GoogleLib::init : error`)
+
+    }
+    catch(err) {console.log(`GoogleLib::init: error => ${err.message}`)}
 
 })()
 
