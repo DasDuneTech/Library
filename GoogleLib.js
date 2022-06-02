@@ -63,15 +63,11 @@ const refreshToken = async(tokenInfo) => {
             method: 'POST',    
             body: formData2
         });
+
+        let res2  = await res.json()
+        let info = res.ok ? res2 : `refreshToken :: http request error : ${res2.error} - ${res2.error_description}`
+        return(info)
         
-        if (!res.ok) {
-            console.log((`refresh token http request error :: code:${res.status} - ${res.statusText}`))
-            return(`refresh token http request error :: code:${res.status} - ${res.statusText}`)
-        }   
-        else {
-             let info  = await res.json()
-             return(info)
-            }
     }
     catch(err) {
         console.log(err.message)
@@ -81,20 +77,19 @@ const refreshToken = async(tokenInfo) => {
 }
 
 
-
 const accessToken = async() => {
 
     try {
 
         const rToken = fs.readFileSync('oauth2GoogleRefreshToken.txt', 'utf8') 
         let tokenInfo = await refreshToken({rToken:rToken})
-        token = tokenInfo.access_token
-        return(tokenInfo.access_token)
-
+        if (typeof tokenInfo === 'object') token = tokenInfo.access_token
+        else console.log(tokenInfo)
     }
     catch(err) {console.log(err.message)}
 
 }
+
 
 
 //get all files list from Google Drive
@@ -104,15 +99,10 @@ const getFilesList = async() => {
 
     try {
 
-        res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
-        if (!res.ok) {
-            console.log((`getFilesList http request error :: code:${res.status} - ${res.statusText}`))
-            return(`getFilesList http request error :: code:${res.status} - ${res.statusText}`)
-        }   
-        else {
-             let info  = await res.json()
-             return(info)
-            }
+        let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+        let res2  = await res.json()
+        let info = res.ok ? res2 : `getFilesList :: http request error : ${res2.error.message}`
+        return(info)
     }
     catch(err) {
         console.log(err.message)
@@ -129,27 +119,27 @@ const getSpreadsheetsList = async() => {
 
     try {
 
-        res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+        let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+        let res2  = await res.json()
+        let info = res.ok ? res2 : `getSpreadsheetsList :: http request error : ${res2.error.message}`
 
-        if (!res.ok) {
-            console.log((`getSpreadsheetsList http request error :: code:${res.status} - ${res.statusText}`))
-            return(`getSpreadsheetsList http request error :: code:${res.status} - ${res.statusText}`)
-        } 
-        else {
-            let info  = await res.json()
+        if (res.ok) {
             fs.writeFileSync(`spreadsheetsList.txt`, JSON.stringify(info.files), (err) => {
                 if (err) console.log(err.message);
             });
             spreadsheetsList = info.files
-            return(info)
         }
 
+        return(info)
     }
     catch(err) {
         console.log(err.message)
         return(err.message)
     }
 }
+
+
+
 
 
 //get spreadsheet info and its sheets info
@@ -164,23 +154,18 @@ const getSpreadsheetInfo = async(spreadsheetName) => {
 
         let url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}`
 
-        res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+        let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+        let res2  = await res.json()
+        let info = res.ok ? res2 : `getSpreadsheetInfo :: http request error : ${res2.error.message}`
+        return(info)
 
-        if (!res.ok) {
-            console.log((`getSpreadsheetInfo http request error :: code:${res.status} - ${res.statusText}`))
-            return(`getSpreadsheetInfo http request error :: code:${res.status} - ${res.statusText}`)
-        } 
-        else {
-            let info  = await res.json()
-            return(info)
-        }
-    
     }
     catch(err) {
         console.log(err.message)
         return(err.message)
     }
 }
+
 
 //get spreadsheet Id from spreadsheet name    
 const getSpreadsheetId = async(spreadsheetName) => {
@@ -209,6 +194,8 @@ getSheetInfo = async(sheetInfo) => {
 
     try {
 
+        token = `fkk;ldskf;dsk;`
+
         const sheetsId = await getSpreadsheetId(spreadsheetName)
 
         range2 = range === undefined ? `` : `!${range}`
@@ -216,15 +203,11 @@ getSheetInfo = async(sheetInfo) => {
 
         let url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsId}/values/${sheetName}${range2}${formulas}`
         let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
-
-        if (!res.ok) {
-            console.log((`getSheetInfo http request error :: code:${res.status} - ${res.statusText}`))
-            return(`getSheetInfo http request error :: code:${res.status} - ${res.statusText}`)
-        } 
-        else {
-
-            let info  = await res.json()
-
+        let res2  = await res.json()
+        let info = res.ok ? res2 : `getSheetInfo :: http request error : ${res2.error.message}`
+         
+        if (res.ok) {
+            
             let index = -1
         
             //create/update cache
@@ -238,12 +221,14 @@ getSheetInfo = async(sheetInfo) => {
 
             return(info.values)
         }
+        else return(info)
     }
     catch(err) {
         console.log(err.message)
         return(err.message)
     }
 }
+
 
 
 
@@ -266,6 +251,9 @@ const getInfo = async(sheetInfo) => {
         return(err.message)
     }
 }
+
+
+
 
 
 
@@ -292,15 +280,10 @@ const update = async(sheetInfo) => {
             },
             body: JSON.stringify(payloadObj)
         });
+        let res2  = await res.json()
+        let info = res.ok ? res2 : `update :: http request error : ${res2.error.message}`
+        return(info)
 
-        if (!res.ok) {
-            console.log((`update http request error :: code:${res.status} - ${res.statusText}`))
-            return(`update http request error :: code:${res.status} - ${res.statusText}`)
-        } 
-        else {
-            info = await res.json()
-            return(info)
-        }
     }
     catch(err) {
         console.log(err.message)
@@ -334,15 +317,9 @@ const batchUpdate = async(sheetInfo) => {
             },
             body: JSON.stringify(payloadObj)
         });
-
-        if (!res.ok) {
-            console.log((`batch update http request error :: code:${res.status} - ${res.statusText}`))
-            return(`batch update http request error :: code:${res.status} - ${res.statusText}`)
-        } 
-        else {
-            info  = await res.json()
-            return(info)
-        }
+        let res2  = await res.json()
+        let info = res.ok ? res2 : `batch update :: http request error : ${res2.error.message}`
+        return(info)
     }
     catch(err) {
         console.log(err.message)
@@ -414,8 +391,8 @@ init = (async() => {
 
     try {
 
-        let info = await accessToken()
-        info = await getSpreadsheetsList()
+        await accessToken()
+        let info = await getSpreadsheetsList()
         if (typeof info === 'object') console.log(`GoogleLib::init : completed`)
         else console.log(`GoogleLib::init : error`)
 
