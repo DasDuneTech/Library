@@ -350,7 +350,7 @@ const getFileId = async(fileInfo) => {
 
 //download a Google Workspace file from Google Drive (pdf not supported by export method)
 //export cannot be used for binary file such as pdf files
-const downloadFile = async(fileInfo) => {
+const exportFile = async(fileInfo) => {
 
     const {name, type} = fileInfo
 
@@ -379,7 +379,7 @@ const downloadFile = async(fileInfo) => {
 
 
 //download a pdf from Google Drive (cannot use export bacause a pdf is not a Google Workspace file (binary file))
-const downloadBinaryFile = async(fileName) => {
+const downloadFile = async(fileName) => {
 
     url = `https://www.googleapis.com/drive/v3/files/1PMNrvTR4pIJoIqHumk2BMKLw4OP5yJOpKQdYaPcnpjE?alt=media`
 
