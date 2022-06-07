@@ -126,9 +126,10 @@ const getFilesList = async() => {
 const getFileId = async(fileInfo) => {
 
     const {name, type} = fileInfo
-   
-    if (type === `pdf`) type2 = `application/pdf`
+
+    let type2 = `application/pdf`
     if (type === `spreadsheet`) type2 = `application/vnd.google-apps.spreadsheet`
+    if (type === `doc`) type2 = `application/vnd.google-apps.document`
    
        try {
    
@@ -148,16 +149,15 @@ const getFileId = async(fileInfo) => {
 
 
 //download a Google Workspace file from Google Drive (binary files like pdf are not supported by export method)
-//export cannot be used for binary file such as pdf files
+//export cannot be used for binary file such as pdf files, the destination file is by default a pdf file
 const exportFile = async(fileInfo) => {
 
     const {name, type} = fileInfo
-
     const fileId = await getFileId(fileInfo)
 
-    let url = `https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=application/${type}`
+    let url = `https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=application/pdf`
 
-    fileStream = fs.createWriteStream(name)
+    fileStream = fs.createWriteStream(`${name}.pdf`)
 
     try {
 
@@ -178,11 +178,15 @@ const exportFile = async(fileInfo) => {
    
    
 //download a binary file from Google Drive (cannot use export bacause a pdf is not a Google Workspace file (binary file))
-const downloadFile = async(fileName) => {
+//the destination file is by default a pdf file
+const downloadFile = async(fileInfo) => {
 
-    url = `https://www.googleapis.com/drive/v3/files/1PMNrvTR4pIJoIqHumk2BMKLw4OP5yJOpKQdYaPcnpjE?alt=media`
 
-    fileStream = fs.createWriteStream('file')
+    const fileId = await getFileId(fileInfo)
+
+    url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`
+
+    fileStream = fs.createWriteStream(name)
 
     try {
 
@@ -202,26 +206,27 @@ const downloadFile = async(fileName) => {
    
 
 
+
 //file upload to Google Drive
+//source code origin : https://gist.github.com/tanaikech/33563b6754e5054f3a5832667100fe91
 const uploadFile = async(fileName) => {
 
-    //source code origin : https://gist.github.com/tanaikech/33563b6754e5054f3a5832667100fe91
-
-    const filePath = "./file.pdf";
-
     var formData = new FormData();
-    var fileMetadata = {name: "file.pdf"};
+    var fileMetadata = {name: fileName};
     formData.append("metadata", JSON.stringify(fileMetadata), {contentType: "application/json"});
-    formData.append("data", fs.createReadStream(filePath), {contentType: "application/pdf"});
-    fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
+    formData.append("data", fs.createReadStream(fileName), {contentType: "application/pdf"});
+    let res = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
         method: "POST",
         body: formData,
         headers: { Authorization: "Bearer " + token },
     })
-        .then((res) => res.json())
-        .then(console.log);
 
+    let res2  = await res.json()
+    let info = res.ok ? res2 : `getFilesList :: http request error : ${res2.error.message}`
+    return(info)
 }
+
+
 
 
 
@@ -470,4 +475,4 @@ init = (async() => {
 
 })()
 
-module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getFileId, getSpreadsheetInfo, getValues, updateSheet, batchUpdateSheet, downloadFile }
+module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getFileId, exportFile, getSpreadsheetInfo, getValues, updateSheet, batchUpdateSheet, downloadFile, uploadFile }

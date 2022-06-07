@@ -19,7 +19,7 @@ const upload = multer();
 app.use(upload.array()); 
 
 //Google Sheets Functions library
-const {codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, getFileId, getSpreadsheetsList, getSpreadsheetInfo, getValues, update, batchUpdate, downloadFile} = require(`./GoogleLib`)
+const {codeRequest, refreshToken, accessToken, getFilesList, getFileId, exportFile, getSpreadsheetInfo, getValues, update, batchUpdate, downloadFile, uploadFile} = require(`./GoogleLib`)
 
 
 //http get response 
@@ -108,16 +108,6 @@ app.get('/getFilesList', async (req, res) => {
 })
 
 //get spreadsheets details list from Google Sheets
-app.get('/getSpreadsheetsList', async (req, res) => {
-
-    await accessToken() 
-    let info =  await getSpreadsheetsList()
-    console.log(info)
-    res.send(info)
- 
- })
-
-//get spreadsheets details list from Google Sheets
 app.get('/getFileId', async (req, res) => {
 
     await accessToken() 
@@ -127,6 +117,53 @@ app.get('/getFileId', async (req, res) => {
     res.send(info)
  
  })
+
+
+
+
+
+//file export (download) - only Google Workspace files allow
+app.get('/exportFile', async (req, res) => {
+
+    await accessToken() 
+
+    let fileInfo = {name:`Electricity`, type:`doc`}
+    let info =  await exportFile(fileInfo)
+    if (typeof info !== 'object') res.send(info)
+    else res.send(info)
+ 
+ })
+
+
+
+
+//file download - only binary files (like pdf) allow
+app.get('/downloadFile', async (req, res) => {
+
+    await accessToken() 
+
+    let fileInfo = {name:`Electricity.pdf`, type:`pdf`}
+    let info =  await downloadFile(fileInfo)
+    if (typeof info !== 'object') res.send(info)
+    else res.send(info)
+ 
+ })
+
+
+
+
+//file upload
+app.get('/uploadFile', async (req, res) => {
+
+    await accessToken() 
+
+    let fileName = `salsa.pdf`
+    let info =  await uploadFile(fileName)
+    if (typeof info !== 'object') res.send(info)
+    else res.send(info)
+ 
+ })
+
 
 
 
@@ -140,6 +177,11 @@ app.get('/getFileId', async (req, res) => {
 
 })
 
+
+
+
+
+
 //get sheet values for a given sheet (values or formulas)
  app.get('/getValues', async (req, res) => {
 
@@ -150,6 +192,10 @@ app.get('/getFileId', async (req, res) => {
     res.send(info)
 
  })
+
+
+
+
 
 //update a range for a given sheet 
  app.get('/update', async (req, res) => {
@@ -163,6 +209,8 @@ app.get('/getFileId', async (req, res) => {
     res.send(info)
 
  })
+
+ 
 
  //update multiple ranges for multiples sheets for a given spreadsheet
  app.get('/batchUpdate', async (req, res) => {
@@ -180,17 +228,7 @@ app.get('/getFileId', async (req, res) => {
 
 
 
-//file download
-app.get('/downloadFile', async (req, res) => {
 
-    await accessToken() 
-
-    let fileInfo = {name:`Fan.pdf`, type:`pdf`}
-    let info =  await downloadFile(fileInfo)
-    if (typeof info !== 'object') res.send(info)
-    else res.send(info.sheets)
- 
- })
 
 
 
