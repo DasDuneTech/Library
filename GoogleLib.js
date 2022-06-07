@@ -3,6 +3,7 @@ const fs = require('fs');
 const FormData = require('form-data');
 const fetch = require('node-fetch');
 require('dotenv').config()
+const Blob = require('buffer')
 
 const appId = process.env.GOOGLE_OAUTH2_APP_ID
 const secret = process.env.GOOGLE_OAUTH2_APP_SECRET
@@ -13,7 +14,7 @@ appUri = `http://localhost:8080/oauth2GoogleCallback`
 refreshTokenUrl = `https://oauth2.googleapis.com/token`
 
 let token
-let spreadsheetsList
+let filesList
 let cacheSheet = []
 
 
@@ -102,32 +103,11 @@ const getFilesList = async() => {
         let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
         let res2  = await res.json()
         let info = res.ok ? res2 : `getFilesList :: http request error : ${res2.error.message}`
-        return(info)
-    }
-    catch(err) {
-        console.log(err.message)
-        return(err.message)
-    }
-
-}
-
-
-//get spreadsheets list from Google Sheets, save to file and load to memory
-const getSpreadsheetsList = async() => {
-
-    let url = `https://www.googleapis.com/drive/v3/files?q=mimeType: "application/vnd.google-apps.spreadsheet"`
-
-    try {
-
-        let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
-        let res2  = await res.json()
-        let info = res.ok ? res2 : `getSpreadsheetsList :: http request error : ${res2.error.message}`
-
         if (res.ok) {
-            fs.writeFileSync(`spreadsheetsList.txt`, JSON.stringify(info.files), (err) => {
+            fs.writeFileSync(`filesList.txt`, JSON.stringify(info.files), (err) => {
                 if (err) console.log(err.message);
             });
-            spreadsheetsList = info.files
+            filesList = info.files
         }
 
         return(info)
@@ -136,20 +116,57 @@ const getSpreadsheetsList = async() => {
         console.log(err.message)
         return(err.message)
     }
+
 }
 
 
 
 
 
-//get spreadsheet info and its sheets info
+//get file metadata info or download the file (if binary file)
+const getFileInfo = async(fileInfo, download) => {
+
+    const {name} = fileInfo
+
+    const fileId = await getFileId(fileInfo)
+
+    let url = `https://www.googleapis.com/drive/v3/files/${fileId}`
+
+    url = download === undefined ? url : `${url}?alt=media`
+
+    try {
+
+        let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+        let res2  = await res.json()
+        let info = res.ok ? res2 : `getFilesList :: http request error : ${res2.error.message}`
+        if (res.ok) {
+            fs.writeFileSync(`filesList.txt`, JSON.stringify(info.files), (err) => {
+                if (err) console.log(err.message);
+            });
+            filesList = info.files
+        }
+
+        info = download === undefined ? info : `file ${name} downloaded`
+        return(info)
+    }
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
+
+}
+
+
+
+
+//get spreadsheet/sheets info
 const getSpreadsheetInfo = async(spreadsheetName) => {
 
     let spreadsheetId = ``    
 
     try {
 
-        spreadsheetsList.map((item) => {if (item.name === spreadsheetName) spreadsheetId = item.id})
+        filesList.map((item) => {if (item.name === spreadsheetName && item.mimeType === `application/vnd.google-apps.spreadsheet`) spreadsheetId = item.id})
         if (spreadsheetId === ``) return(`cannot find the sheets Id`)
 
         let url = `https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}`
@@ -167,28 +184,8 @@ const getSpreadsheetInfo = async(spreadsheetName) => {
 }
 
 
-//get spreadsheet Id from spreadsheet name    
-const getSpreadsheetId = async(spreadsheetName) => {
-
-    try {
-
-        if (spreadsheetsList === undefined) await getSpreadsheetsList()
-        let spreadsheetId = ``    
-        spreadsheetsList.map((item) => {if (item.name === spreadsheetName) spreadsheetId = item.id})
-        return(spreadsheetId)
-    }
-    catch(err) {
-        console.log(err.message)
-        return(err.message)
-    }
-}
-
-
-
-
-
 //get sheet info from Google sheets (values or formulas)
-getSheetInfo = async(sheetInfo) => {
+getSheetValues = async(sheetInfo) => {
 
     const {spreadsheetName, sheetName, range, isFormulas} = sheetInfo
 
@@ -233,7 +230,7 @@ getSheetInfo = async(sheetInfo) => {
 
 
 //get sheet info from cache or sheets
-const getInfo = async(sheetInfo) => {
+const getValues = async(sheetInfo) => {
 
     const {spreadsheetName, sheetName, range} = sheetInfo
     let index = -1
@@ -330,6 +327,79 @@ const batchUpdate = async(sheetInfo) => {
 
 
 
+//get fileId from file  s
+const getFileId = async(fileInfo) => {
+
+ const {name, type} = fileInfo
+
+ if (type === `pdf`) type2 = `application/pdf`
+ if (type === `spreadsheet`) type2 = `application/vnd.google-apps.spreadsheet`
+
+    try {
+
+        if (filesList === undefined) await getFilesList()
+        let fileId = ``    
+        filesList.map((item) => {if (item.name === name && item.mimeType === type2) fileId = item.id})
+        return(fileId)
+    }
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
+}
+
+//download a Google Workspace file from Google Drive (pdf not supported by export method)
+//export cannot be used for binary file such as pdf files
+const downloadFile = async(fileInfo) => {
+
+    const {name, type} = fileInfo
+
+    const fileId = await getFileId(fileInfo)
+
+    let url = `https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=application/${type}`
+
+    fileStream = fs.createWriteStream(name)
+
+    try {
+
+        let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+        await new Promise((resolve, reject) => {
+            res.body.pipe(fileStream);
+            res.body.on("error", reject);
+            fileStream.on("finish", resolve);
+        })
+    }
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
+
+}
+
+
+
+//download a pdf from Google Drive (cannot use export bacause a pdf is not a Google Workspace file (binary file))
+const downloadBinaryFile = async(fileName) => {
+
+    url = `https://www.googleapis.com/drive/v3/files/1PMNrvTR4pIJoIqHumk2BMKLw4OP5yJOpKQdYaPcnpjE?alt=media`
+
+    fileStream = fs.createWriteStream('file')
+
+    try {
+
+        let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+        await new Promise((resolve, reject) => {
+            res.body.pipe(fileStream);
+            res.body.on("error", reject);
+            fileStream.on("finish", resolve);
+        })
+    }
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
+
+}
 
 
 
@@ -338,10 +408,28 @@ const batchUpdate = async(sheetInfo) => {
 
 
 
+//file upload to Google Drive
+const uploadFile = async(fileName) => {
 
+    //source code origin : https://gist.github.com/tanaikech/33563b6754e5054f3a5832667100fe91
 
+    const filePath = "./file.pdf";
 
+    var formData = new FormData();
+    var fileMetadata = {
+      name: "file.pdf",
+    };
+    formData.append("metadata", JSON.stringify(fileMetadata), {contentType: "application/json"});
+    formData.append("data", fs.createReadStream(filePath), {contentType: "application/pdf"});
+    fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
+      method: "POST",
+      body: formData,
+      headers: { Authorization: "Bearer " + token },
+    })
+      .then((res) => res.json())
+      .then(console.log);
 
+}
 
 
 
@@ -387,12 +475,15 @@ const batchUpdate = async(sheetInfo) => {
 
 init = (async() => {
 
+    await accessToken()
+    uploadFile()
+
     //set the sheets info list
 
     try {
 
         await accessToken()
-        let info = await getSpreadsheetsList()
+        let info = await getFilesList()
         if (typeof info === 'object') console.log(`GoogleLib::init : completed`)
         else console.log(`GoogleLib::init : error`)
 
@@ -401,4 +492,4 @@ init = (async() => {
 
 })()
 
-module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getSpreadsheetsList, getSpreadsheetInfo, getInfo, update, batchUpdate }
+module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getFileId, getSpreadsheetInfo, getValues, update, batchUpdate, downloadFile }

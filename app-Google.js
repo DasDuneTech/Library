@@ -19,7 +19,7 @@ const upload = multer();
 app.use(upload.array()); 
 
 //Google Sheets Functions library
-const {codeRequest, refreshToken, accessToken, getFilesList, getSpreadsheetsList, getSpreadsheetInfo, getInfo, update, batchUpdate} = require(`./GoogleLib`)
+const {codeRequest, refreshToken, accessToken, getFilesList, getFileId, getSpreadsheetsList, getSpreadsheetInfo, getValues, update, batchUpdate, downloadFile} = require(`./GoogleLib`)
 
 
 //http get response 
@@ -117,6 +117,19 @@ app.get('/getSpreadsheetsList', async (req, res) => {
  
  })
 
+//get spreadsheets details list from Google Sheets
+app.get('/getFileId', async (req, res) => {
+
+    await accessToken() 
+    let fileInfo = {name: `Fan`, type: `pdf`}
+    let info =  await getFileId(fileInfo)
+    console.log(info)
+    res.send(info)
+ 
+ })
+
+
+
 //get sheets details for a given spreadsheet
  app.get('/getSpreadsheetInfo', async (req, res) => {
 
@@ -127,12 +140,12 @@ app.get('/getSpreadsheetsList', async (req, res) => {
 
 })
 
-//get sheet info for a given sheet (values or formulas)
- app.get('/getInfo', async (req, res) => {
+//get sheet values for a given sheet (values or formulas)
+ app.get('/getValues', async (req, res) => {
 
     await accessToken() 
     let spreadsheetInfo = {spreadsheetName:`Library`, sheetName:`Library`, isFormulas:true}
-    let info =  await getInfo(spreadsheetInfo)
+    let info =  await getValues(spreadsheetInfo)
     console.log(info)
     res.send(info)
 
@@ -162,3 +175,25 @@ app.get('/getSpreadsheetsList', async (req, res) => {
     res.send(info)
 
 })
+
+
+
+
+
+//file download
+app.get('/downloadFile', async (req, res) => {
+
+    await accessToken() 
+
+    let fileInfo = {name:`Fan.pdf`, type:`pdf`}
+    let info =  await downloadFile(fileInfo)
+    if (typeof info !== 'object') res.send(info)
+    else res.send(info.sheets)
+ 
+ })
+
+
+
+
+
+
