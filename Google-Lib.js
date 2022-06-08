@@ -238,7 +238,7 @@ const downloadFile = async(fileInfo) => {
 
 
 //file upload to Google Drive
-//source code origin : https://gist.github.com/tanaikech/33563b6754e5054f3a5832667100fe91
+//source code idea : https://gist.github.com/tanaikech/33563b6754e5054f3a5832667100fe91
 //note : PUT method does not seem to work with existing file upload (not found error) 
 const uploadFile = async(fileInfo) => {
 
@@ -373,7 +373,7 @@ const getValues = async(sheetInfo) => {
 
 
 //update sheet
-const updateSheet = async(sheetInfo) => {
+const update = async(sheetInfo) => {
 
     const {spreadsheetName, sheetName, range, payload} = sheetInfo
 
@@ -413,7 +413,7 @@ const updateSheet = async(sheetInfo) => {
 
 
 //batch update spreadsheet
-const batchUpdateSheet = async(sheetInfo) => {
+const batchUpdate = async(sheetInfo) => {
 
     const {spreadsheetName, payload} = sheetInfo
 
