@@ -19,7 +19,7 @@ const upload = multer();
 app.use(upload.array()); 
 
 //Google Sheets Functions library
-const {codeRequest, refreshToken, accessToken, getFilesList, getFileId, exportFile, getSpreadsheetInfo, getValues, update, batchUpdate, downloadFile, uploadFile} = require(`./GoogleLib`)
+const {codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, exportFile, getSpreadsheetInfo, getValues, update, batchUpdate, downloadFile, uploadFile} = require(`./GoogleLib`)
 
 
 //http get response 
@@ -92,11 +92,6 @@ app.get('/oauth2GoogleCallback', async(req, res) => {
 
 
 
-
-
-
-
-
 //get files details list from Google Sheets
 app.get('/getFilesList', async (req, res) => {
 
@@ -106,6 +101,11 @@ app.get('/getFilesList', async (req, res) => {
    res.send(info)
 
 })
+
+
+
+
+
 
 //get spreadsheets details list from Google Sheets
 app.get('/getFileId', async (req, res) => {
@@ -156,16 +156,16 @@ app.get('/downloadFile', async (req, res) => {
 app.get('/uploadFile', async (req, res) => {
 
     await accessToken() 
-
-    let fileName = `salsa.pdf`
-    let info =  await uploadFile(fileName)
-    if (typeof info !== 'object') res.send(info)
-    else res.send(info)
+    let fileInfo = {name:`Salsa.pdf`, type:`pdf`}
+    let info =  await uploadFile(fileInfo)
+    res.send(info)
  
  })
 
 
 
+
+ 
 
 //get sheets details for a given spreadsheet
  app.get('/getSpreadsheetInfo', async (req, res) => {

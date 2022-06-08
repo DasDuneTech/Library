@@ -95,7 +95,7 @@ const accessToken = async() => {
 //get all files list from Google Drive
 const getFilesList = async() => {
     
-    let url = `https://www.googleapis.com/drive/v3/files`
+    let url = `https://www.googleapis.com/drive/v3/files?q=trashed=false`
 
     try {
 
@@ -122,10 +122,10 @@ const getFilesList = async() => {
 
 
 
-//get fileId from files List
-const getFileId = async(fileInfo) => {
+//get file info from files List
+const getFileInfo = async(fileInfo) => {
 
-    const {name, type} = fileInfo
+    const {name, type, id} = fileInfo
 
     let type2 = `application/pdf`
     if (type === `spreadsheet`) type2 = `application/vnd.google-apps.spreadsheet`
@@ -134,9 +134,10 @@ const getFileId = async(fileInfo) => {
        try {
    
            if (filesList === undefined) await getFilesList()
-           let fileId = ``    
-           filesList.map((item) => {if (item.name === name && item.mimeType === type2) fileId = item.id})
-           return(fileId)
+           let fileInfo  
+           filesList.map((item) => {if (item.name === name && item.mimeType === type2) fileInfo = item})
+           let info = id ? fileInfo.id : fileInfo
+           return(info)
        }
        catch(err) {
            console.log(err.message)
@@ -144,6 +145,34 @@ const getFileId = async(fileInfo) => {
        }
 }
    
+
+
+//delete file
+const deleteFile = async(fileInfo) => {
+
+    const {id} = fileInfo
+
+    let url = `https://www.googleapis.com/drive/v3/files/${id}`
+
+    try {
+
+        let res = await fetch(url, {
+            method: 'DELETE',
+            headers: { Authorization: "Bearer " + token },
+        })
+
+        let res2  = await res.json()
+        let info = res.ok ? res2 : `getFilesList :: http request error : ${res2.error.message}`
+        return(info)
+    }
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
+
+
+}
+
 
 
 
@@ -176,12 +205,13 @@ const exportFile = async(fileInfo) => {
 }
    
    
+
    
 //download a binary file from Google Drive (cannot use export bacause a pdf is not a Google Workspace file (binary file))
 //the destination file is by default a pdf file
 const downloadFile = async(fileInfo) => {
 
-
+    const {name, type} = fileInfo
     const fileId = await getFileId(fileInfo)
 
     url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`
@@ -209,25 +239,35 @@ const downloadFile = async(fileInfo) => {
 
 //file upload to Google Drive
 //source code origin : https://gist.github.com/tanaikech/33563b6754e5054f3a5832667100fe91
-const uploadFile = async(fileName) => {
+//note : PUT method does not seem to work with existing file upload (not found error) 
+const uploadFile = async(fileInfo) => {
 
-    var formData = new FormData();
-    var fileMetadata = {name: fileName};
-    formData.append("metadata", JSON.stringify(fileMetadata), {contentType: "application/json"});
-    formData.append("data", fs.createReadStream(fileName), {contentType: "application/pdf"});
-    let res = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
-        method: "POST",
-        body: formData,
-        headers: { Authorization: "Bearer " + token },
-    })
+  const {name, type} = fileInfo
+  let infoFile = await getFileInfo(fileInfo)
 
-    let res2  = await res.json()
-    let info = res.ok ? res2 : `getFilesList :: http request error : ${res2.error.message}`
-    return(info)
+ if (infoFile) await deleteFile(infoFile)
+
+    try {
+
+        var formData = new FormData();
+        var fileMetadata = {name:name}
+        formData.append("metadata", JSON.stringify(fileMetadata), {contentType: "application/json"});
+        formData.append("data", fs.createReadStream(name), {contentType: "application/pdf"});
+        let res = await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart", {
+            method: 'POST',
+            body: formData,
+            headers: { Authorization: "Bearer " + token },
+        })
+
+        let res2  = await res.json()
+        let info = res.ok ? res2 : `getFilesList :: http request error : ${res2.error.message}`
+        return(info)
+    }
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
 }
-
-
-
 
 
 
@@ -255,11 +295,6 @@ const getSpreadsheetInfo = async(spreadsheetName) => {
         return(err.message)
     }
 }
-
-
-
-
-
 
 
 //get sheet info from Google sheets (values or formulas)
@@ -475,4 +510,4 @@ init = (async() => {
 
 })()
 
-module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getFileId, exportFile, getSpreadsheetInfo, getValues, updateSheet, batchUpdateSheet, downloadFile, uploadFile }
+module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, exportFile, getSpreadsheetInfo, getValues, updateSheet, batchUpdateSheet, downloadFile, uploadFile }
