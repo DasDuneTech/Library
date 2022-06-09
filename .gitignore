@@ -1,3 +1,5 @@
 node_modules
 .env
 oauth2GoogleRefreshToken.txt
+oauth2MicrosoftRefreshToken.txt
+oauth2RefreshToken.txt

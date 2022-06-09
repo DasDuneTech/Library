@@ -1,6 +1,7 @@
 // * Basic HTTP server
 const express = require('express');
 const app = express();
+const fs = require('fs');
 
 const port = 8080;
 
@@ -18,8 +19,18 @@ const upload = multer();
 // for parsing multipart/form-data
 app.use(upload.array()); 
 
+//get the config file
+let config = fs.readFileSync('config.json', 'utf8')
+let configObj = JSON.parse(config)
+const {clientCloud} = configObj
+
 //Google Sheets Functions library
-const {codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, exportFile, getSpreadsheetInfo, getValues, update, batchUpdate, downloadFile, uploadFile} = require(`./GoogleLib`)
+const {codeRequest, refreshToken, accessToken} = require(`./${clientCloud}-Lib`)
+// const {codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, exportFile, getSpreadsheetInfo, getValues, update, batchUpdate, downloadFile, uploadFile} = require(`./Google-Lib`)
+
+
+//Google Sheets Functions library
+// const {codeRequest, refreshToken, accessToken, getFilesList, exportFile, getSpreadsheetInfo, getValues, update, batchUpdate, downloadFile, uploadFile} = require(`./Google-Lib`)
 
 
 //http get response 
@@ -53,7 +64,7 @@ app.post('/hello3', async (req, res) => {
 
 
 //redirection to Google Auth to get an authorization code
-app.get('/oauth2Google', async(req, res) => {
+app.get('/oauth2', async(req, res) => {
 
     let url = await codeRequest()
     res.redirect(url);
@@ -63,7 +74,7 @@ app.get('/oauth2Google', async(req, res) => {
 
 
 // redirect URI endpoint to receive the authorization code
-app.get('/oauth2GoogleCallback', async(req, res) => {
+app.get('/oauth2Callback', async(req, res) => {
 
     let code = req.query.code
 
@@ -80,17 +91,18 @@ app.get('/oauth2GoogleCallback', async(req, res) => {
         res.send(`error : Cannot exchange the access code for a refresh token`);
     } 
     else {
-        fs.writeFileSync('oauth2GoogleRefreshToken.txt', tokenInfo.refresh_token)
+        fs.writeFileSync('oauth2RefreshToken.txt', tokenInfo.refresh_token)
         res.send(`thanks user to trust our app.`);
     }
 });
 
 
+//get files details list from Google Sheets
+app.get('/accessToken', async (req, res) => {
 
-
-
-
-
+    await accessToken() 
+    res.send(`done`)
+})
 
 //get files details list from Google Sheets
 app.get('/getFilesList', async (req, res) => {
@@ -223,7 +235,6 @@ app.get('/uploadFile', async (req, res) => {
     res.send(info)
 
 })
-
 
 
 

@@ -1,4 +1,4 @@
-//* OAuth2 Google functions
+//*Google API functions library
 const fs = require('fs');
 const FormData = require('form-data');
 const fetch = require('node-fetch');
@@ -9,26 +9,21 @@ const secret = process.env.GOOGLE_OAUTH2_APP_SECRET
 
 const oauth2Url = `https://accounts.google.com/o/oauth2/v2/auth`
 const scope= [`https://www.googleapis.com/auth/spreadsheets%20https://www.googleapis.com/auth/drive`]
-appUri = `http://localhost:8080/oauth2GoogleCallback`
+appURI = `http://localhost:8080/oauth2GoogleCallback`
 refreshTokenUrl = `https://oauth2.googleapis.com/token`
 
 let token
 let filesList
-let cacheSheet = []
+
 
 
 //access code request
 const codeRequest = async() =>{
 
-    let info =`oauth2GoogleFunctions::codeRequest\n\t`
-    info += `oauth2 access code http request :\n\t`
-
-    let url = `${oauth2Url}?response_type=code&access_type=offline&client_id=${appId}&redirect_uri=${appUri}&scope=${scope}`
-    info += url
-    console.log(info)
-
+    let url = `${oauth2Url}?response_type=code&access_type=offline&client_id=${appId}&redirect_uri=${appURI}&scope=${scope}`
     return(url)
 }
+
 
 
 
@@ -43,7 +38,7 @@ const refreshToken = async(tokenInfo) => {
     formData2.append('client_id', appId);
 
     if (code !== undefined) {
-        formData2.append('redirect_uri', appUri);
+        formData2.append('redirect_uri', appURI);
         formData2.append('client_secret', secret);
         formData2.append('grant_type', 'authorization_code');
         formData2.append('code', code);
@@ -82,7 +77,7 @@ const accessToken = async() => {
 
     try {
 
-        const rToken = fs.readFileSync('oauth2GoogleRefreshToken.txt', 'utf8') 
+        const rToken = fs.readFileSync('oauth2RefreshToken.txt', 'utf8') 
         let tokenInfo = await refreshToken({rToken:rToken})
         if (typeof tokenInfo === 'object') token = tokenInfo.access_token
         else console.log(tokenInfo)
@@ -102,13 +97,6 @@ const getFilesList = async() => {
         let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
         let res2  = await res.json()
         let info = res.ok ? res2 : `getFilesList :: http request error : ${res2.error.message}`
-        if (res.ok) {
-            fs.writeFileSync(`filesList.txt`, JSON.stringify(info.files), (err) => {
-                if (err) console.log(err.message);
-            });
-            filesList = info.files
-        }
-
         return(info)
     }
     catch(err) {
@@ -125,19 +113,13 @@ const getFilesList = async() => {
 //get file info from files List
 const getFileInfo = async(fileInfo) => {
 
-    const {name, type, id} = fileInfo
+    const {name, id} = fileInfo
 
-    let type2 = `application/pdf`
-    if (type === `spreadsheet`) type2 = `application/vnd.google-apps.spreadsheet`
-    if (type === `doc`) type2 = `application/vnd.google-apps.document`
-   
-       try {
-   
-           if (filesList === undefined) await getFilesList()
-           let fileInfo  
-           filesList.map((item) => {if (item.name === name && item.mimeType === type2) fileInfo = item})
-           let info = id ? fileInfo.id : fileInfo
-           return(info)
+    try {
+        let fileInfo = `Google-Lib :: getFileInfo : Cannot get info for the file ${name}` 
+        filesList.map((item) => {if (item.name === name) fileInfo = item})
+        let info = id ? fileInfo.id : fileInfo
+        return(info)
        }
        catch(err) {
            console.log(err.message)
@@ -155,7 +137,6 @@ const deleteFile = async(fileInfo) => {
     let url = `https://www.googleapis.com/drive/v3/files/${id}`
 
     try {
-
         let res = await fetch(url, {
             method: 'DELETE',
             headers: { Authorization: "Bearer " + token },
@@ -177,18 +158,19 @@ const deleteFile = async(fileInfo) => {
 
 
 
+
 //download a Google Workspace file from Google Drive (binary files like pdf are not supported by export method)
 //export cannot be used for binary file such as pdf files, the destination file is by default a pdf file
 const exportFile = async(fileInfo) => {
 
     const {name, type} = fileInfo
-    const fileId = await getFileId(fileInfo)
-
-    let url = `https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=application/pdf`
-
-    fileStream = fs.createWriteStream(`${name}.pdf`)
 
     try {
+        const fileId = await getFileInfo(fileInfo)
+
+        let url = `https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=application/pdf`
+
+        fileStream = fs.createWriteStream(`${name}.${type}`)
 
         let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
         await new Promise((resolve, reject) => {
@@ -196,6 +178,8 @@ const exportFile = async(fileInfo) => {
             res.body.on("error", reject);
             fileStream.on("finish", resolve);
         })
+        let info = res.ok ? `Google-Lib :: exportFile : file ${name} downloaded` : `Google-Lib :: exportFile : http request error : ${name}.${type} - ${res.statusText}`
+        return(info)
     }
     catch(err) {
         console.log(err.message)
@@ -204,6 +188,9 @@ const exportFile = async(fileInfo) => {
 
 }
    
+
+
+
    
 
    
@@ -212,13 +199,13 @@ const exportFile = async(fileInfo) => {
 const downloadFile = async(fileInfo) => {
 
     const {name, type} = fileInfo
-    const fileId = await getFileId(fileInfo)
-
-    url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`
-
-    fileStream = fs.createWriteStream(name)
 
     try {
+        const fileId = await getFileInfo(fileInfo)
+
+        url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`
+
+        fileStream = fs.createWriteStream(name)
 
         let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
         await new Promise((resolve, reject) => {
@@ -226,6 +213,8 @@ const downloadFile = async(fileInfo) => {
             res.body.on("error", reject);
             fileStream.on("finish", resolve);
         })
+        let info = res.ok ? `Google-Lib :: downloadFile : file ${name} downloaded` : `Google-Lib :: downloadFile : http request error : ${name} - ${res.statusText}`
+        return(info)
     }
     catch(err) {
         console.log(err.message)
@@ -237,17 +226,22 @@ const downloadFile = async(fileInfo) => {
 
 
 
+
+
+
 //file upload to Google Drive
 //source code idea : https://gist.github.com/tanaikech/33563b6754e5054f3a5832667100fe91
 //note : PUT method does not seem to work with existing file upload (not found error) 
 const uploadFile = async(fileInfo) => {
 
-  const {name, type} = fileInfo
-  let infoFile = await getFileInfo(fileInfo)
-
- if (infoFile) await deleteFile(infoFile)
+    const {name, type} = fileInfo
 
     try {
+        let infoFile = await getFileInfo(fileInfo)
+
+        if (!fs.existsSync(name)) return(`Google-Lib :: uploadFile : file ${name} does not exists`)
+
+        if (typeof(infoFile) === `object`) await deleteFile(infoFile)
 
         var formData = new FormData();
         var fileMetadata = {name:name}
@@ -260,7 +254,7 @@ const uploadFile = async(fileInfo) => {
         })
 
         let res2  = await res.json()
-        let info = res.ok ? res2 : `getFilesList :: http request error : ${res2.error.message}`
+        let info = res.ok ? res2 : `Google-Lib :: uploadFile : file ${name} http request error : ${res2.error.message}`
         return(info)
     }
     catch(err) {
@@ -268,8 +262,6 @@ const uploadFile = async(fileInfo) => {
         return(err.message)
     }
 }
-
-
 
 
 //get spreadsheet/sheets info
@@ -315,57 +307,19 @@ getSheetValues = async(sheetInfo) => {
         let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
         let res2  = await res.json()
         let info = res.ok ? res2 : `getSheetInfo :: http request error : ${res2.error.message}`
-         
-        if (res.ok) {
-            
-            let index = -1
-        
-            //create/update cache
-            cacheSheet.map((o, i) => { if (Object.keys(o)[0] == `${spreadsheetName}-${sheetName}`) index = i })
-            if (index === -1) {
-                let obj = {}
-                obj[`${spreadsheetName}-${sheetName}`] = info.values
-                cacheSheet.push(obj)
-            }
-            else cacheSheet[index][`${spreadsheetName}-${sheetName}`] = info.values
-
-            return(info.values)
-        }
-        else return(info)
-    }
-    catch(err) {
-        console.log(err.message)
-        return(err.message)
-    }
-}
-
-
-
-
-
-
-
-
-
-//get sheet info from cache or sheets
-const getValues = async(sheetInfo) => {
-
-    const {spreadsheetName, sheetName, range} = sheetInfo
-    let index = -1
-
-    try {
-
-        //get values from cache or from Google Sheets
-        cacheSheet.map((o, i) => { if (Object.keys(o)[0] == `${spreadsheetName}-${sheetName}`) index = i })
-        let info = index === -1 ? await getSheetInfo(sheetInfo) : cacheSheet[index][`${spreadsheetName}-${sheetName}`]
         return(info)
-
     }
     catch(err) {
         console.log(err.message)
         return(err.message)
     }
 }
+
+
+
+
+
+
 
 
 
@@ -494,14 +448,44 @@ const batchUpdate = async(sheetInfo) => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//*init function
 init = (async() => {
 
-    //set the sheets info list
+    //cache the files info list
 
     try {
 
         await accessToken()
         let info = await getFilesList()
+        filesList = info.files
         if (typeof info === 'object') console.log(`GoogleLib::init : completed`)
         else console.log(`GoogleLib::init : error`)
 
@@ -510,4 +494,4 @@ init = (async() => {
 
 })()
 
-module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, exportFile, getSpreadsheetInfo, getValues, updateSheet, batchUpdateSheet, downloadFile, uploadFile }
+module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, exportFile, getSpreadsheetInfo, getSheetValues, update, batchUpdate, downloadFile, uploadFile }
