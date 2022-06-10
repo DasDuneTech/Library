@@ -88,9 +88,18 @@ const accessToken = async() => {
 
 
 //get all files list from Google Drive
-const getFilesList = async() => {
-    
-    let url = `https://www.googleapis.com/drive/v3/files?q=trashed=false`
+const getFilesList = async(query) => {
+
+    let mimeType = ``
+    let trashFlag = `?q=trashed=false`
+    if (query) {
+        mimeType = query.type === `pdf` ? `?q=mimeType="application/pdf"` : mimeType
+        mimeType = query.type === `sheet` ? `?q=mimeType="application/vnd.google-apps.spreadsheet"` : mimeType
+        if (query.trash) trashFlag =  mimeType === `` ? `` : ` and ${trashFlag}` //trash is included by default
+        else trashFlag = mimeType === `` ? trashFlag : ` and trashed=false`
+    }
+
+    let url = `https://www.googleapis.com/drive/v3/files${mimeType}${trashFlag}`
 
     try {
 
@@ -105,8 +114,6 @@ const getFilesList = async() => {
     }
 
 }
-
-
 
 
 
