@@ -25,7 +25,7 @@ let configObj = JSON.parse(config)
 const {clientCloud} = configObj
 
 //Google Sheets Functions library
-const {codeRequest, refreshToken, accessToken} = require(`./${clientCloud}-Lib`)
+const {codeRequest, refreshToken, accessToken, getFilesList} = require(`./${clientCloud}-Lib`)
 // const {codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, exportFile, getSpreadsheetInfo, getValues, update, batchUpdate, downloadFile, uploadFile} = require(`./Google-Lib`)
 
 
@@ -107,10 +107,16 @@ app.get('/accessToken', async (req, res) => {
 //get files details list from Google Sheets
 app.get('/getFilesList', async (req, res) => {
 
-   await accessToken() 
-   let info =  await getFilesList()
-   console.log(info)
-   res.send(info)
+    let type = req.query.type
+    let query = {type:type}
+
+    //use select with Microsoft to avoid a ton of useless information
+    query = {...query, ...{select:`name,id,webUrl,@microsoft.graph.downloadUrl`}}
+
+    await accessToken() 
+    let info =  await getFilesList(query)
+    console.log(info)
+    res.send(info)
 
 })
 

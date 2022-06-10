@@ -87,6 +87,33 @@ const accessToken = async() => {
 }
 
 
+//get all files list from One Drive
+const getFilesList = async(query) => {
+
+    let mimeType = `children`
+    let select = ``
+    if (query) {
+        mimeType = query.type === `pdf` ? `search(q='.pdf')` : mimeType
+        mimeType = query.type === `excel` ? `search(q='.xlsx')` : mimeType
+        selection = query.select ? `?select=${query.select}` : select
+    }
+
+    url = `https://graph.microsoft.com/v1.0/me/drive/root/${mimeType}${selection}`
+    // let url = `https://graph.microsoft.com/v1.0/me/drive/root/search(q='.pdf')?select=name,id,webUrl`
+    
+    try {
+
+        let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+        let res2  = await res.json()
+        let info = res.ok ? res2 : `getFilesList :: http request error : ${res2.error.message}`
+        return(info)
+    }
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
+
+}
 
 
 
@@ -97,4 +124,6 @@ const accessToken = async() => {
 
 
 
-module.exports = { codeRequest, refreshToken, accessToken }
+
+
+module.exports = { codeRequest, refreshToken, accessToken, getFilesList }
