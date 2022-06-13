@@ -106,7 +106,7 @@ const getFilesList = async(query) => {
         let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
         let res2  = await res.json()
         let info = res.ok ? res2 : `getFilesList :: http request error : ${res2.error.message}`
-        return(info)
+        return(info.files)
     }
     catch(err) {
         console.log(err.message)
@@ -122,6 +122,8 @@ const getFileInfo = async(fileInfo) => {
 
     const {name, id} = fileInfo
 
+    if (!filesList) filesList = await getFilesList()
+
     try {
         let fileInfo = `Google-Lib :: getFileInfo : Cannot get info for the file ${name}` 
         filesList.map((item) => {if (item.name === name) fileInfo = item})
@@ -134,6 +136,7 @@ const getFileInfo = async(fileInfo) => {
        }
 }
    
+
 
 
 //delete file
@@ -195,6 +198,9 @@ const exportFile = async(fileInfo) => {
 
 }
    
+
+
+
 
 
 
@@ -299,13 +305,11 @@ const getSpreadsheetInfo = async(spreadsheetName) => {
 //get sheet info from Google sheets (values or formulas)
 getSheetValues = async(sheetInfo) => {
 
-    const {spreadsheetName, sheetName, range, isFormulas} = sheetInfo
+    const {sheetsName, sheetName, range, formulas} = sheetInfo
 
     try {
 
-        token = `fkk;ldskf;dsk;`
-
-        const sheetsId = await getSpreadsheetId(spreadsheetName)
+        const sheetsId = await getSpreadsheetId(sheetsName)
 
         range2 = range === undefined ? `` : `!${range}`
         formulas = isFormulas ? `?valueRenderOption=FORMULA` : ``
