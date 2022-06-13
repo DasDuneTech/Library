@@ -25,7 +25,7 @@ let configObj = JSON.parse(config)
 const {clientCloud} = configObj
 
 //Google Sheets Functions library
-const {codeRequest, refreshToken, accessToken, getFilesList} = require(`./${clientCloud}-Lib`)
+const {codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, getFileId, downloadFile, getSheetsInfo, getSheetValues, update} = require(`./${clientCloud}-Lib`)
 // const {codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, exportFile, getSpreadsheetInfo, getValues, update, batchUpdate, downloadFile, uploadFile} = require(`./Google-Lib`)
 
 
@@ -127,16 +127,29 @@ app.get('/getFilesList', async (req, res) => {
 
 
 
-//get spreadsheets details list from Google Sheets
-app.get('/getFileId', async (req, res) => {
+//get file info
+app.get('/getFileInfo', async (req, res) => {
 
     await accessToken() 
-    let fileInfo = {name: `Electricity.pdf`, type: `pdf`}
-    let info =  await getFileId(fileInfo)
+    let info =  await getFileInfo(`Electricity.pdf`)
     console.log(info)
     res.send(info)
  
  })
+
+
+
+//get file info
+app.get('/getFileId', async (req, res) => {
+
+    await accessToken() 
+    let info =  await getFileId(`Electricity.pdf`)
+    console.log(info)
+    res.send(info)
+
+})
+
+
 
 
 
@@ -162,8 +175,7 @@ app.get('/downloadFile', async (req, res) => {
 
     await accessToken() 
 
-    let fileInfo = {name:`Electricity.pdf`, type:`pdf`}
-    let info =  await downloadFile(fileInfo)
+    let info =  await downloadFile(`Electricity.pdf`)
     if (typeof info !== 'object') res.send(info)
     else res.send(info)
  
@@ -187,13 +199,13 @@ app.get('/uploadFile', async (req, res) => {
 
  
 
-//get sheets details for a given spreadsheet
- app.get('/getSpreadsheetInfo', async (req, res) => {
+//get sheets info
+ app.get('/getSheetsInfo', async (req, res) => {
 
    await accessToken() 
-   let info =  await getSpreadsheetInfo(`Library`)
-   if (typeof info !== 'object') res.send(info)
-   else res.send(info.sheets)
+   let info =  await getSheetsInfo(`tagsList1.xlsx`)
+   res.send(info)
+
 
 })
 
@@ -203,11 +215,12 @@ app.get('/uploadFile', async (req, res) => {
 
 
 //get sheet values for a given sheet (values or formulas)
- app.get('/getValues', async (req, res) => {
+ app.get('/getSheetValues', async (req, res) => {
 
     await accessToken() 
-    let spreadsheetInfo = {spreadsheetName:`Library`, sheetName:`Library`, isFormulas:true}
-    let info =  await getValues(spreadsheetInfo)
+    // let sheetInfo = {sheetsName:`Library`, sheetName:`Library`, formulas:true}
+    let sheetInfo = {sheetsName:`tagsList1.xlsx`, sheetName:`Sheet1`}
+    let info =  await getSheetValues(sheetInfo)
     console.log(info)
     res.send(info)
 
@@ -223,8 +236,8 @@ app.get('/uploadFile', async (req, res) => {
     await accessToken() 
     let payload = [[666],["=HYPERLINK(\"https://dasdunetech.com/library/Google.html\",\"Google API\")"]]
     let range = `B3:B4`
-    let spreadsheetInfo = {spreadsheetName:`Library`, sheetName:`Library`, range:range, payload:payload}
-    let info = await update(spreadsheetInfo)
+    let sheetsInfo = {sheetsName:`tagsList1.xlsx`, sheetName:`Sheet1`, range:range, payload:payload}
+    let info = await update(sheetsInfo)
     console.log(info)
     res.send(info)
 

@@ -12,8 +12,8 @@ const appURI = `http://localhost:8080/oauth2Callback`
 
 
 
-
-
+let token
+let filesList
 
 
 
@@ -91,7 +91,7 @@ const accessToken = async() => {
 const getFilesList = async(query) => {
 
     let mimeType = `children`
-    let select = ``
+    let selection = ``
     if (query) {
         mimeType = query.type === `pdf` ? `search(q='.pdf')` : mimeType
         mimeType = query.type === `excel` ? `search(q='.xlsx')` : mimeType
@@ -106,6 +106,63 @@ const getFilesList = async(query) => {
         let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
         let res2  = await res.json()
         let info = res.ok ? res2 : `getFilesList :: http request error : ${res2.error.message}`
+        return(info.value)
+    }
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
+
+}
+
+
+
+//get file info from files List
+const getFileInfo = async(fileName) => {
+
+    if (!filesList) filesList = await getFilesList()
+
+    try {
+        let info = `Microsoft-Lib :: getFileInfo : Cannot get info for the file ${fileName}` 
+        filesList.map((item) => {if (item.name === fileName) info = item})
+        return(info)
+       }
+       catch(err) {
+           console.log(err.message)
+           return(err.message)
+       }
+}
+
+
+//get file Id
+const getFileId = async(fileName) => {
+
+    let info = await getFileInfo(fileName)
+    return(info.id)
+
+}
+
+
+
+
+
+//file download from One Drive
+const downloadFile = async(fileName) => {
+
+    let info = await getFileInfo(fileName)
+    let url = info["@microsoft.graph.downloadUrl"]
+
+    try {
+
+        fileStream = fs.createWriteStream(fileName)
+
+        let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+        await new Promise((resolve, reject) => {
+            res.body.pipe(fileStream);
+            res.body.on("error", reject);
+            fileStream.on("finish", resolve);
+        })
+        let info = res.ok ? `Microsoft-Lib :: downloadFile : file ${fileName} downloaded` : `Microsoft-Lib :: downloadFile : http request error : ${fileName} - ${res.statusText}`
         return(info)
     }
     catch(err) {
@@ -119,6 +176,30 @@ const getFilesList = async(query) => {
 
 
 
+//get workbook/worksheets info
+const getSheetsInfo = async(fileName) => {
+
+    if (!filesList) filesList = await getFilesList()
+    let sheetsId = ``
+
+    try {
+
+        filesList.map((item) => {if (item.name === fileName && item.file.mimeType === `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`) sheetsId = item.id})
+        if (sheetsId === ``) return(`cannot find the file Id`)
+
+        let url = `https://graph.microsoft.com/v1.0/me/drive/items/${sheetsId}/workbook/worksheets`
+
+        let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+        let res2  = await res.json()
+        let info = res.ok ? res2 : `getSpreadsheetInfo :: http request error : ${res2.error.message}`
+        return(info)
+
+    }
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
+}
 
 
 
@@ -126,4 +207,62 @@ const getFilesList = async(query) => {
 
 
 
-module.exports = { codeRequest, refreshToken, accessToken, getFilesList }
+//get sheet info from Excel (values or formulas)
+getSheetValues = async(sheetInfo) => {
+
+    const {sheetsName, sheetName} = sheetInfo
+
+    try {
+
+        const sheetsId = await getFileId(sheetsName)
+
+        let url = `https://graph.microsoft.com/v1.0/me/drive/items/${sheetsId}/workbook/worksheets/${sheetName}/usedRange`
+        let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+        let res2  = await res.json()
+        let info = res.ok ? res2 : `getSheetValues :: http request error : ${res2.error.message}`
+        return(info)
+    }
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
+}
+
+
+
+
+
+//update sheet
+const update = async(sheetInfo) => {
+
+    const {sheetsName, sheetName, range, payload} = sheetInfo
+
+    try {
+
+        const sheetsId = await getFileId(sheetsName)
+
+        payloadObj = {values:payload}
+        
+        url = `https://graph.microsoft.com/v1.0/me/drive/items/${sheetsId}/workbook/worksheets/${sheetName}/range(address='${range}')`
+        let res = await fetch(url, 
+            {
+            method: 'PATCH',    
+            headers: {
+            Authorization: 'Bearer ' + token,
+            'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payloadObj)
+        });
+        let res2  = await res.json()
+        let info = res.ok ? res2 : `update :: http request error : ${res2.error.message}`
+        return(info)
+
+    }
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
+}
+
+
+module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, getFileId, downloadFile, getSheetsInfo, getSheetValues, update}
