@@ -25,7 +25,7 @@ let configObj = JSON.parse(config)
 const {clientCloud} = configObj
 
 //Google Sheets Functions library
-const {codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, getFileId, downloadFile, getSheetsInfo, getSheetValues, update} = require(`./${clientCloud}-Lib`)
+const {codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, getFileId, downloadFile, getSheetsInfo, getSheetValues, update, batchUpdate} = require(`./${clientCloud}-Lib`)
 // const {codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, exportFile, getSpreadsheetInfo, getValues, update, batchUpdate, downloadFile, uploadFile} = require(`./Google-Lib`)
 
 
@@ -248,16 +248,59 @@ app.get('/uploadFile', async (req, res) => {
  //update multiple ranges for multiples sheets for a given spreadsheet
  app.get('/batchUpdate', async (req, res) => {
 
+    let batchValues = sortSheetsValues(tags)
+    
     await accessToken() 
-    let payload = [["Library!C4:C4", 888],["Sheet2!D4:D4", 889],["Library!E4:E4", 887]]
-    let sheetsInfo = {spreadsheetName:`Library`, payload:payload}
-    let info = await batchUpdate(sheetsInfo)
+
+    for (const val of batchValues) {
+
+        sheetsInfo = {spreadsheetName:val[0], payload:val[1]}    
+        info = await batchUpdate(sheetsInfo)
+        console.log(info)
+
+    }
+
+ 
+
+    // let payload = [["Library!C4:C4", 888],["Sheet2!D4:D4", 889],["Library!E4:E4", 887]]
+    // let sheetsInfo = {spreadsheetName:`Library`, payload:payload}
+    // let info = await batchUpdate(sheetsInfo)
     console.log(info)
     res.send(info)
 
 })
 
 
+
+let tags = 
+[
+    [`Library`, `Sheet1!B4:B4`, 1],
+    [`Library`, `Sheet2!B3:B3`, 2],
+    [`Library`, `Sheet3!B6:B6`, 3],
+    [`Library2`, `Sheet2!B8:B8`, 4],
+    [`Library2`, `Sheet3!B2:B2`, 5],
+    [`Library3`, `Sheet1!B7:B7`, 6],
+    [`Library3`, `Sheet3!B3:B3`, 7],
+]
+
+
+
+sortSheetsValues = (arr) =>  {
+
+    let info = []
+    let ssIndex
+
+    arr.map((item) => {
+        info.map((ss, i) => {if (ss[0]===item[0]) ssIndex = i})
+        if (info.filter((ss) => {return ss[0]===item[0]}).length === 0) info.push([item[0], [[item[1], item[2]]]])
+        else info[ssIndex][1].push([item[1], item[2]])
+    })
+
+    return(info)
+
+
+
+}
 
 
 

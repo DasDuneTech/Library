@@ -94,7 +94,7 @@ const getFilesList = async(query) => {
     let trashFlag = `?q=trashed=false`
     if (query) {
         mimeType = query.type === `pdf` ? `?q=mimeType="application/pdf"` : mimeType
-        mimeType = query.type === `sheet` ? `?q=mimeType="application/vnd.google-apps.spreadsheet"` : mimeType
+        mimeType = query.type === `sheets` ? `?q=mimeType="application/vnd.google-apps.spreadsheet"` : mimeType
         if (query.trash) trashFlag =  mimeType === `` ? `` : ` and ${trashFlag}` //trash is included by default
         else trashFlag = mimeType === `` ? trashFlag : ` and trashed=false`
     }
@@ -106,6 +106,7 @@ const getFilesList = async(query) => {
         let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
         let res2  = await res.json()
         let info = res.ok ? res2 : `getFilesList :: http request error : ${res2.error.message}`
+        filesList = info.files
         return(info.files)
     }
     catch(err) {
@@ -118,17 +119,15 @@ const getFilesList = async(query) => {
 
 
 //get file info from files List
-const getFileInfo = async(fileInfo) => {
-
-    const {name, id} = fileInfo
+const getFileInfo = async(fileName) => {
 
     if (!filesList) filesList = await getFilesList()
 
     try {
-        let fileInfo = `Google-Lib :: getFileInfo : Cannot get info for the file ${name}` 
-        filesList.map((item) => {if (item.name === name) fileInfo = item})
-        let info = id ? fileInfo.id : fileInfo
-        return(info)
+        let fileInfo = `Google-Lib :: getFileInfo : Cannot get info for the file ${fileName}` 
+        filesList.map((item) => {if (item.name === fileName) fileInfo = item})
+        // let info = id ? fileInfo.id : fileInfo
+        return(fileInfo)
        }
        catch(err) {
            console.log(err.message)
@@ -136,6 +135,22 @@ const getFileInfo = async(fileInfo) => {
        }
 }
    
+
+
+
+
+//get file Id
+const getFileId = async(fileName) => {
+
+    let info = await getFileInfo(fileName)
+    return(info.id)
+
+}
+
+
+
+
+
 
 
 
@@ -384,7 +399,8 @@ const batchUpdate = async(sheetInfo) => {
 
     try {
 
-        const sheetsId = await getSpreadsheetId(spreadsheetName)
+        await getFilesList({type:`sheets`})
+        const sheetsId = await getFileId(spreadsheetName)
 
         let payloadObj = {valueInputOption: "USER_ENTERED", includeValuesInResponse: true}
         let arrObj = []
@@ -496,7 +512,7 @@ init = (async() => {
 
         await accessToken()
         let info = await getFilesList()
-        filesList = info.files
+        // filesList = info.files
         if (typeof info === 'object') console.log(`GoogleLib::init : completed`)
         else console.log(`GoogleLib::init : error`)
 
