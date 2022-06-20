@@ -21,6 +21,7 @@ let indexFile
 
 let bookSheetCache = []
 
+
 //access code request
 const codeRequest = async() =>{
 
@@ -91,6 +92,11 @@ const accessToken = async() => {
 }
 
 
+
+
+
+
+
 //get all files list from Google Drive
 const getFilesList = async(query) => {
 
@@ -122,6 +128,15 @@ const getFilesList = async(query) => {
 
 
 
+
+
+
+
+
+
+
+
+
 //get file info from files List
 const getFileInfo = async(fileName) => {
 
@@ -142,7 +157,6 @@ const getFileInfo = async(fileName) => {
 
 
 
-
 //get file Id
 const getFileId = async(fileName) => {
 
@@ -150,11 +164,6 @@ const getFileId = async(fileName) => {
     return(info.id)
 
 }
-
-
-
-
-
 
 
 
@@ -217,6 +226,8 @@ const exportFile = async(fileInfo) => {
 
 }
    
+
+
 
 
 
@@ -297,7 +308,7 @@ const uploadFile = async(fileInfo) => {
 
 
 //get spreadsheet/sheets info
-const getSpreadsheetInfo = async(spreadsheetName) => {
+const getBookInfo = async(spreadsheetName) => {
 
     let spreadsheetId = ``    
 
@@ -346,16 +357,6 @@ getSheetValues = async(sheetInfo) => {
 }
 
 
-
-
-
-
-
-
-
-
-
-
 //update sheet
 const update = async(sheetInfo) => {
 
@@ -389,6 +390,7 @@ const update = async(sheetInfo) => {
         return(err.message)
     }
 }
+
 
 
 
@@ -431,6 +433,8 @@ const batchUpdate = async(sheetsInfo) => {
     }
 
 }
+
+
 
 
 //batch update spreadsheet (advanced)
@@ -493,63 +497,6 @@ const batch = async(tags) => {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 //*init function
 init = (async() => {
 
@@ -570,4 +517,164 @@ init = (async() => {
 
 })()
 
-module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, exportFile, getSpreadsheetInfo, getSheetValues, update, batch, batchUpdate, downloadFile, uploadFile, tagIndexer }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//common functions
+const tagIndexer = async(info) => {
+
+    const {bookName, sheetName} = info
+
+    let headerOffset
+    let names = ``
+
+    await getFilesList({type:`excel`})
+    let sheetInfo = await getSheetValues(info)
+    let sheetValues = sheetInfo.values
+
+    sheetValues.map((item, i)=> {if (item.indexOf('Name') !== -1) headerOffset = i})
+    if (headerOffset === -1) {
+        console.log(`GoogleLib::tagIndexer : cannot find <Name> field in header`)
+        return(`GoogleLib::tagIndexer : cannot find <Name> field in header`)
+    }
+
+    val =  sheetValues.slice(headerOffset)
+
+    header = val[0]
+    val.map((val) => names += `§${val[header.indexOf('Name')]}`)
+    names += `§`
+
+    let bookRef = ''
+    let sheetRef= ''
+    let bookRefNew= ''
+    let sheetRefNew = ''
+
+    indexFile = fs.readFileSync(`index.txt`, 'utf8') 
+
+    bookId = await getFileId(bookName)
+
+    //check if book-sheet cache exists in index file
+    let regex = new RegExp(`@${`${bookName}¶${bookId}`}`, 'gi');
+    if (regex.test(indexFile)) {
+        regex = new RegExp(`@${`${bookName}¶${bookId}`}[^@]*`, 'gi');
+        bookRef = indexFile.match(regex)
+        }
+    //create   
+    else {
+        bookRef += `@${`${bookName}¶${bookId}`}`
+        indexFile += bookRef
+    }
+
+    //check if sheet exists
+    let bookRef2 = bookRef[0].length == 1 ? bookRef : bookRef[0] 
+    regex = new RegExp(`~${sheetName}`, 'gi');
+    if (regex.test(bookRef2)) {
+        regex = new RegExp(`~${sheetName}[^~@]*`, 'gi');
+        sheetRef= bookRef2.match(regex)
+        sheetRefNew = `~${sheetName}&${names}`
+        shNew = bookRef2.replace(bookRef[0], bookRefNew)
+        }
+    //create ws    
+    else {
+        bookRef += `~${sheetName}&${names}`
+        bookRefNew = sheetRef+ bookRef
+        }
+
+    let indexFile2 = indexFile.replace(bookRef2, bookRefNew)
+    fs.writeFileSync(`index.txt`, indexFile2 ) 
+
+   return(bookRefNew)
+
+
+
+
+}
+
+const tagInfo = async(tag) => {
+  
+    try {
+
+        if (!indexFile) indexFile = fs.readFileSync(`index.txt`, 'utf8') 
+
+        tag = tag.toString()
+
+        //get tag's ref info
+        let regex = new RegExp(`[^@]*${tag}[^@]*`, 'gi');
+        let tagRef = indexFile .match(regex)
+
+        //get book
+        let book2 = tagRef[0].match(/[^~]*/)[0]
+        let bookName = book2.split('¶')[0]
+        let bookId = book2.split('¶')[1]
+    
+        //get worksheet
+        regex = new RegExp(`[^~]*§${tag}§[^~]*`, 'i');
+        let sheetRef = tagRef[0].match(regex)
+        let sheetName = sheetRef[0].match(/[^&]*/)[0]
+        // console.log(sheet[0])rowRef
+
+        //get header
+        // let keys = sheet[0].match(/\^[^¥§]*/)
+        // let header = keys[0].split(`^`)
+        // header.shift()
+        // header.pop()
+        // console.log(keys)
+
+        //get row index
+        let rowRef = sheetRef[0].match(/[^&]*$/)
+        let rows = rowRef[0].split(`§`)
+        rows.shift()
+        rows.pop()
+        let row = rows.indexOf(tag) 
+
+        // if (row == -1) return (`no info found for tag : ${tag}`)
+        if (row == -1) return (`app :: tagInfo : tag not found`)
+        else  return ({bookName: bookName, bookId:bookId, sheetName: sheetName, rows:rows, row:row})
+    
+    }
+    
+    catch(err) { 
+        console.log(`excel::tagInfo cannot read info for tag ${tag}`)
+        return (`excel::tagInfo cannot read info for tag ${tag}`)
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
+
+module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, exportFile, getBookInfo, getSheetValues, update, batch, batchUpdate, downloadFile, uploadFile, tagIndexer, tagInfo }

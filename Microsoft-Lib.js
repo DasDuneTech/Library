@@ -20,6 +20,8 @@ let indexFile
 
 
 
+
+
 //access code request
 const codeRequest = async() =>{
 
@@ -90,6 +92,11 @@ const accessToken = async() => {
 }
 
 
+
+
+
+
+
 //get all files list from One Drive
 const getFilesList = async(query) => {
 
@@ -122,6 +129,14 @@ const getFilesList = async(query) => {
 
 
 
+
+
+
+
+
+
+
+
 //get file info from files List
 const getFileInfo = async(fileName) => {
 
@@ -139,6 +154,9 @@ const getFileInfo = async(fileName) => {
 }
 
 
+
+
+
 //get file Id
 const getFileId = async(fileName) => {
 
@@ -146,8 +164,6 @@ const getFileId = async(fileName) => {
     return(info.id)
 
 }
-
-
 
 
 
@@ -182,7 +198,7 @@ const downloadFile = async(fileName) => {
 
 
 //get workbook/worksheets info
-const getSheetsInfo = async(fileName) => {
+const getBookInfo = async(fileName) => {
 
     if (!filesList) filesList = await getFilesList()
     let sheetsId = ``
@@ -211,7 +227,6 @@ const getSheetsInfo = async(fileName) => {
 
 
 
-
 //get sheet info from Excel (values or formulas)
 getSheetValues = async(sheetInfo) => {
 
@@ -232,6 +247,11 @@ getSheetValues = async(sheetInfo) => {
         return(err.message)
     }
 }
+
+
+
+
+
 
 
 
@@ -272,6 +292,11 @@ const update = async(sheetInfo) => {
 
 
 
+
+
+
+
+
 //batch update worksheets
 const batchUpdate = async(reqArr) => {
 
@@ -303,6 +328,11 @@ const batchUpdate = async(reqArr) => {
     }
 
 }
+
+
+
+
+
 
 
 
@@ -395,11 +425,23 @@ const batch = async(tags) => {
      info = await batchUpdate(reqArr)
      console.log(info)
      return(info)
-
-
-
-
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -428,6 +470,34 @@ init = (async() => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//common functions
 const tagIndexer = async(info) => {
 
     const {bookName, sheetName} = info
@@ -547,4 +617,4 @@ const tagInfo = async(tag) => {
 
 }
 
-module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, getFileId, downloadFile, getSheetsInfo, getSheetValues, update, batch, tagIndexer}
+module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, getFileId, downloadFile, getBookInfo, getSheetValues, update, batch, tagIndexer, tagInfo}
