@@ -25,12 +25,12 @@ let configObj = JSON.parse(config)
 const {clientCloud} = configObj
 
 //Google Sheets Functions library
-const {codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, getFileId, downloadFile, getSheetsInfo, getSheetValues, update, batchUpdate} = require(`./${clientCloud}-Lib`)
+const {codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, getFileId, downloadFile, getSheetsInfo, getSheetValues, update, batch, batchUpdate, tagIndexer } = require(`./${clientCloud}-Lib`)
 // const {codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, exportFile, getSpreadsheetInfo, getValues, update, batchUpdate, downloadFile, uploadFile} = require(`./Google-Lib`)
 
 
-//Google Sheets Functions library
-// const {codeRequest, refreshToken, accessToken, getFilesList, exportFile, getSpreadsheetInfo, getValues, update, batchUpdate, downloadFile, uploadFile} = require(`./Google-Lib`)
+
+let bookSheetCache = []
 
 
 //http get response 
@@ -236,8 +236,8 @@ app.get('/uploadFile', async (req, res) => {
     await accessToken() 
     let payload = [[666],["=HYPERLINK(\"https://dasdunetech.com/library/Google.html\",\"Google API\")"]]
     let range = `B3:B4`
-    let sheetsInfo = {sheetsName:`tagsList1.xlsx`, sheetName:`Sheet1`, range:range, payload:payload}
-    let info = await update(sheetsInfo)
+    let bookInfo = {bookName:`tagsList1.xlsx`, sheetName:`Sheet1`, range:range, payload:payload}
+    let info = await update(bookInfo)
     console.log(info)
     res.send(info)
 
@@ -245,26 +245,10 @@ app.get('/uploadFile', async (req, res) => {
 
  
 
- //update multiple ranges for multiples sheets for a given spreadsheet
- app.get('/batchUpdate', async (req, res) => {
+ //update multiple ranges for multiples sheets
+ app.get('/batch', async (req, res) => {
 
-    let batchValues = sortSheetsValues(tags)
-    
-    await accessToken() 
-
-    for (const val of batchValues) {
-
-        sheetsInfo = {spreadsheetName:val[0], payload:val[1]}    
-        info = await batchUpdate(sheetsInfo)
-        console.log(info)
-
-    }
-
- 
-
-    // let payload = [["Library!C4:C4", 888],["Sheet2!D4:D4", 889],["Library!E4:E4", 887]]
-    // let sheetsInfo = {spreadsheetName:`Library`, payload:payload}
-    // let info = await batchUpdate(sheetsInfo)
+    info = await batch(tags)
     console.log(info)
     res.send(info)
 
@@ -274,33 +258,82 @@ app.get('/uploadFile', async (req, res) => {
 
 let tags = 
 [
-    [`Library`, `Sheet1!B4:B4`, 1],
-    [`Library`, `Sheet2!B3:B3`, 2],
-    [`Library`, `Sheet3!B6:B6`, 3],
-    [`Library2`, `Sheet2!B8:B8`, 4],
-    [`Library2`, `Sheet3!B2:B2`, 5],
-    [`Library3`, `Sheet1!B7:B7`, 6],
-    [`Library3`, `Sheet3!B3:B3`, 7],
+    [`Tag1`, `Header1`, `=HYPERLINK("https://dasdunetech.com/","DasDuneTech")`],
+    [`Tag5`, `Header1`, `=HYPERLINK("https://dasdunetech.com/","DDT")`],
+    [`Tag16`, `Header2`, `=HYPERLINK("https://dasdunetech.com/","DDT")`],
+    [`Tag29`, `Header3`, `=HYPERLINK("https://dasdunetech.com/","DDT")`],
+    [`Tag203`, `Header4`, `=HYPERLINK("https://dasdunetech.com/","DDT")`],
+    [`Tag217`, `Header5`, `=HYPERLINK("https://dasdunetech.com/","DDT")`],
+    [`Tag226`, `Header6`, `=HYPERLINK("https://dasdunetech.com/","DDT")`],
+    [`Tag305`, `Header7`, `=HYPERLINK("https://dasdunetech.com/","DDT")`],
+    [`Tag313`, `Header8`, `=HYPERLINK("https://dasdunetech.com/","DDT")`],
+    [`Tag336`, `Header4`, `=HYPERLINK("https://dasdunetech.com/","DDT")`]
 ]
 
 
 
-sortSheetsValues = (arr) =>  {
-
-    let info = []
-    let ssIndex
-
-    arr.map((item) => {
-        info.map((ss, i) => {if (ss[0]===item[0]) ssIndex = i})
-        if (info.filter((ss) => {return ss[0]===item[0]}).length === 0) info.push([item[0], [[item[1], item[2]]]])
-        else info[ssIndex][1].push([item[1], item[2]])
-    })
-
-    return(info)
 
 
+app.get('/tagIndexer', async (req, res) => {
 
-}
+    let sheetsInfo 
+    let info 
+
+    sheetsInfo = {bookName:`Library.xlsx`, sheetName:`Sheet1`}
+    info = await tagIndexer(sheetsInfo)
+    console.log(info)
+
+    sheetsInfo = {bookName:`Library.xlsx`, sheetName:`Sheet2`}
+    info = await tagIndexer(sheetsInfo)
+    console.log(info)
+    
+    sheetsInfo = {bookName:`Library.xlsx`, sheetName:`Sheet3`}
+    info = await tagIndexer(sheetsInfo)
+    console.log(info)
+
+    sheetsInfo = {bookName:`Library3.xlsx`, sheetName:`Sheet1`}
+    info = await tagIndexer(sheetsInfo)
+    console.log(info)
+
+    sheetsInfo = {bookName:`Library3.xlsx`, sheetName:`Sheet2`}
+    info = await tagIndexer(sheetsInfo)
+    console.log(info)
+    
+    sheetsInfo = {bookName:`Library3.xlsx`, sheetName:`Sheet3`}
+    info = await tagIndexer(sheetsInfo)
+    console.log(info)
+
+    sheetsInfo = {bookName:`Library2.xlsx`, sheetName:`Sheet1`}
+    info = await tagIndexer(sheetsInfo)
+    console.log(info)
+
+    sheetsInfo = {bookName:`Library2.xlsx`, sheetName:`Sheet2`}
+    info = await tagIndexer(sheetsInfo)
+    console.log(info)
+    
+    sheetsInfo = {bookName:`Library2.xlsx`, sheetName:`Sheet3`}
+    info = await tagIndexer(sheetsInfo)
+    console.log(info)
+
+
+    res.send(info)
+
+
+})
+
+
+
+
+app.get('/tagInfo', async (req, res) => {
+
+    let info = await tagInfo(`Tag1`)
+
+    console.log(info)
+
+    res.send(info)
+
+})
+
 
 
 

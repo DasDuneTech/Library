@@ -4,6 +4,8 @@ const FormData = require('form-data');
 const fetch = require('node-fetch');
 require('dotenv').config()
 
+const {tagIndexer, tagInfo } = require(`./core.js`)
+
 const appId = process.env.GOOGLE_OAUTH2_APP_ID
 const secret = process.env.GOOGLE_OAUTH2_APP_SECRET
 
@@ -14,8 +16,10 @@ refreshTokenUrl = `https://oauth2.googleapis.com/token`
 
 let token
 let filesList
+let indexFile
 
 
+let bookSheetCache = []
 
 //access code request
 const codeRequest = async() =>{
@@ -320,16 +324,16 @@ const getSpreadsheetInfo = async(spreadsheetName) => {
 //get sheet info from Google sheets (values or formulas)
 getSheetValues = async(sheetInfo) => {
 
-    const {sheetsName, sheetName, range, formulas} = sheetInfo
+    const {book, sheet, range, isFormulas} = sheetInfo
 
     try {
 
-        const sheetsId = await getSpreadsheetId(sheetsName)
+        const bookId = await getFileId(book)
 
         range2 = range === undefined ? `` : `!${range}`
         formulas = isFormulas ? `?valueRenderOption=FORMULA` : ``
 
-        let url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsId}/values/${sheetName}${range2}${formulas}`
+        let url = `https://sheets.googleapis.com/v4/spreadsheets/${bookId}/values/${sheet}${range2}${formulas}`
         let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
         let res2  = await res.json()
         let info = res.ok ? res2 : `getSheetInfo :: http request error : ${res2.error.message}`
@@ -355,11 +359,11 @@ getSheetValues = async(sheetInfo) => {
 //update sheet
 const update = async(sheetInfo) => {
 
-    const {spreadsheetName, sheetName, range, payload} = sheetInfo
+    const {bookName, sheetName, range, payload} = sheetInfo
 
     try {
 
-        const sheetsId = await getSpreadsheetId(spreadsheetName)
+        const bookId = await getFileId(bookName)
 
         range2 = range === undefined ? `` : `!${range}`
         payloadObj = {values:payload}
@@ -391,11 +395,10 @@ const update = async(sheetInfo) => {
 
 
 
-
 //batch update spreadsheet
-const batchUpdate = async(sheetInfo) => {
+const batchUpdate = async(sheetsInfo) => {
 
-    const {spreadsheetName, payload} = sheetInfo
+    const {spreadsheetName, payload} = sheetsInfo
 
     try {
 
@@ -430,15 +433,59 @@ const batchUpdate = async(sheetInfo) => {
 }
 
 
+//batch update spreadsheet (advanced)
+const batch = async(tags) => {
 
+    let  tagsInfo = []
+    let sortedVal = []
+    let ssIndex
 
+    for (tag of tags) { 
 
+        let info = await tagInfo(tag[0])
+        if (typeof info === 'string') continue
 
+        const {book, bookId, sheet, rows, row} = info
 
+        index = -1
+        bookSheetCache.map((o, i) => { if (Object.keys(o)[0] == `${book}-${sheet}`) index = i })
 
+        if (index === -1) {
+            sheetValues = await getSheetValues({book:book, sheet:sheet})
+            sheetValues.values.map((item, i)=> {if (item.indexOf('Name') !== -1) headerIndex = i})
+            bookSheetVal = sheetValues.values.slice(headerIndex)
+            obj = {}
+            obj[`${book}-${sheet}`] = bookSheetVal 
+            bookSheetCache.push(obj)
+            tagValues = JSON.parse(JSON.stringify(bookSheetVal))
+            // tagValues = bookSheetVal
+        }
+        else {
+            bookSheetObj = bookSheetCache[index]
+            tagValues = Object.values(bookSheetObj)[0]
+        }
 
+        let header = tagValues[0]
+        let data = tagValues.shift()
 
+        let colIndex = header.indexOf(tag[1])
+        let col =  colIndex < 26 ? String.fromCharCode(colIndex  + 65) : `A${String.fromCharCode(colIndex %26+ 65)}`;
 
+        item = ([`${book}`, `${sheet}!${col}${row+headerIndex+1}:${col}${row+headerIndex+1}`, `${tag[2]}`])
+   
+        sortedVal.map((ss, i) => {if (ss[0]===item[0]) ssIndex = i})
+        if (sortedVal.filter((ss) => {return ss[0]===item[0]}).length === 0) sortedVal.push([item[0], [[item[1], item[2]]]])
+        else sortedVal[ssIndex][1].push([item[1], item[2]])
+    }
+
+    for (const val of sortedVal) {
+
+        sheetsInfo = {spreadsheetName:val[0], payload:val[1]}    
+        info = await batchUpdate(sheetsInfo)
+        console.log(info)
+
+    }
+}
 
 
 
@@ -511,14 +558,16 @@ init = (async() => {
     try {
 
         await accessToken()
-        let info = await getFilesList()
-        // filesList = info.files
-        if (typeof info === 'object') console.log(`GoogleLib::init : completed`)
-        else console.log(`GoogleLib::init : error`)
+        let info = await getFilesList({type: `sheets`})
+        if (typeof info === 'string') console.log(`GoogleLib::init : getFilesList error`)
+
+        // sheetsInfo = {sheetsName:`Library2`, sheetName:`Sheet3`}
+        // info = await tagIndexer(sheetsInfo)
+        // if (typeof info === 'string') console.log(`GoogleLib::init : tagIndexer error`)
 
     }
     catch(err) {console.log(`GoogleLib::init: error => ${err.message}`)}
 
 })()
 
-module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, exportFile, getSpreadsheetInfo, getSheetValues, update, batchUpdate, downloadFile, uploadFile }
+module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, exportFile, getSpreadsheetInfo, getSheetValues, update, batch, batchUpdate, downloadFile, uploadFile, tagIndexer }
