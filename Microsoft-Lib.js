@@ -205,7 +205,7 @@ const getBookInfo = async(fileName) => {
 
     try {
 
-        filesList.map((item) => {if (item.name === fileName && item.file.mimeType === `application/vnd.openxmlformats-officedocument.spreadsheetml.sheet`) sheetsId = item.id})
+        filesList.map((item) => {if (item.name === fileName) sheetsId = item.id})
         if (sheetsId === ``) return(`cannot find the file Id`)
 
         let url = `https://graph.microsoft.com/v1.0/me/drive/items/${sheetsId}/workbook/worksheets`

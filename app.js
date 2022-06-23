@@ -25,7 +25,6 @@ let configObj = JSON.parse(config)
 const {clientCloud} = configObj
 
 //Microsoft Functions library
-import  * as microsoft from `./${clientCloud}-Lib`
 const {codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, getFileId, downloadFile, getBookInfo, getSheetValues, update, batch, tagIndexer, taginfo } = require(`./${clientCloud}-Lib`)
 
 
@@ -162,7 +161,7 @@ app.get('/getFileInfo', async (req, res) => {
     try {
 
         await accessToken() 
-        let info =  await getFileInfo(`Electricity.pdf`)
+        let info =  await getFileInfo(`Library.xlsx`)
         console.log(info)
         res.send(info)
     }
@@ -262,7 +261,7 @@ app.get('/uploadFile', async (req, res) => {
     try {
 
         await accessToken() 
-        let info =  await getBookInfo(`tagsList1.xlsx`)
+        let info =  await getBookInfo(`Library.xlsx`)
         res.send(info)
     }
     catch(err){
@@ -283,7 +282,7 @@ app.get('/uploadFile', async (req, res) => {
 
         await accessToken() 
         // let sheetInfo = {sheetsName:`Library`, sheetName:`Library`, formulas:true}
-        let sheetInfo = {sheetsName:`tagsList1.xlsx`, sheetName:`Sheet1`}
+        let sheetInfo = {bookName:`Library.xlsx`, sheetName:`Sheet1`}
         let info =  await getSheetValues(sheetInfo)
         console.log(info)
         res.send(info)
