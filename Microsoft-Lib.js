@@ -498,7 +498,17 @@ init = (async() => {
 
 
 //common functions
-const tagIndexer = async(info) => {
+
+
+
+
+
+
+
+
+
+
+const tagIndexer2 = async(info) => {
 
     const {bookName, sheetName} = info
 
@@ -567,7 +577,7 @@ const tagIndexer = async(info) => {
 
 }
 
-const tagInfo = async(tag) => {
+const tagInfo2 = async(tag) => {
   
     try {
 
