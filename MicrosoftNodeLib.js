@@ -37,12 +37,10 @@ const codeRequest = async() =>{
 
 
 
-//refresh token from code/refresh token
-const refreshToken = async(tokenInfo) => {
+//refresh token from code
+const accessCode = async(code) => {
 
-    const {code, rToken} = tokenInfo
-
-    if (code === undefined && rToken === undefined) return(`cannot refresh token`)
+    if (code === undefined) return(`cannot refresh token`)
 
     const formData2 = new FormData();
     formData2.append('client_id', appClientId);
@@ -52,10 +50,7 @@ const refreshToken = async(tokenInfo) => {
         formData2.append('grant_type', 'authorization_code');
         formData2.append('code', code);
     }
-    if (rToken !== undefined) {
-        formData2.append('grant_type', 'refresh_token');
-        formData2.append('refresh_token', rToken);
-    }
+    else return(`cannot refresh token`)
 
     let url = `${oauth2Url}/token`
 
@@ -82,27 +77,42 @@ const refreshToken = async(tokenInfo) => {
 
 
 
-
-
-
-
-
-//get a fresh access token (run when the library is loaded to provide a 1 hr access token )
+//get a fresh access token 
 const accessToken = async() => {
+
+    const rToken = fs.readFileSync('oauth2RefreshToken.txt', 'utf8') 
+    const formData2 = new FormData();
+    formData2.append('client_id', appClientId);
+    formData2.append('grant_type', 'refresh_token');
+    formData2.append('refresh_token', rToken);
+
+    let url = `${oauth2Url}/token`
 
     try {
 
-        const rToken = fs.readFileSync('oauth2MicrosoftRefreshToken.txt', 'utf8') 
-        let tokenInfo = await refreshToken({rToken:rToken})
-        if (typeof tokenInfo === 'object') {
-            token = tokenInfo.access_token
-            return(token)
+        let res = await fetch(url, 
+            {
+            method: 'POST',    
+            body: formData2
+        });
+
+        let res2  = await res.json()
+        let info = res.ok ? res2 : `refreshToken :: http request error : ${res2.error} - ${res2.error_description}`
+        if (typeof info === 'object') {
+            token = info.access_token
+            fs.writeFileSync('oauth2RefreshToken.txt', info.refresh_token)
         }
-        else console.log(tokenInfo)
+        else token = info
+        return(token)
     }
-    catch(err) {console.log(err.message)}
+    catch(err) {
+        console.log(err.message)
+        return(err.message)
+    }
 
 }
+
+
 
 
 

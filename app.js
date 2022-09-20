@@ -65,7 +65,39 @@ app.post('/hello3', async (req, res) => {
 })
 
 
-//redirection to Google Auth to get an authorization code
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//redirection to cloud provider Auth to get an authorization code
 app.get('/oauth2', async(req, res) => {
 
     try{
@@ -80,6 +112,11 @@ app.get('/oauth2', async(req, res) => {
 });
 
 
+
+
+
+
+
 // redirect URI endpoint to receive the authorization code
 app.get('/oauth2Callback', async(req, res) => {
 
@@ -87,21 +124,21 @@ app.get('/oauth2Callback', async(req, res) => {
 
         let code = req.query.code
 
-        let info =`oauth2GoogleCallback ::\n\t`
+        let info =`oauth2Callback ::\n\t`
         for (const [key, val] of Object.entries(req.query)) info += `${key}: ${val}\n\t`
         console.log(info)
 
-        let tokenInfo = await refreshToken({code:code})
+        let tokenInfo = await accessCode(code)
 
-        if (tokenInfo.refresh_token === undefined) {
-            info =`oauth2GoogleCallback ::\n\t`
+        if (tokenInfo.refresh_token !== undefined) {
+             fs.writeFileSync('oauth2RefreshToken.txt', tokenInfo.refresh_token)
+            res.send(`thanks user to trust our app.`);
+        }
+        else {
+            info =`oauth2Callback ::\n\t`
             info += `error : Cannot exchange the access code for a refresh token`
             console.log(info)
             res.send(`error : Cannot exchange the access code for a refresh token`);
-        } 
-        else {
-            fs.writeFileSync('oauth2RefreshToken.txt', tokenInfo.refresh_token)
-            res.send(`thanks user to trust our app.`);
         }
     }
     catch(err){
