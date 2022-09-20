@@ -627,4 +627,4 @@ const tagInfo2 = async(tag) => {
 
 }
 
-module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, getFileId, downloadFile, getBookInfo, getSheetValues, update, batch, tagIndexer, tagInfo}
+module.exports = { codeRequest, refreshToken, accessToken, getFilesList, getFileInfo, getFileId, downloadFile, getBookInfo, getSheetValues, update, batch}
