@@ -1,0 +1,104 @@
+@import "./lib/lib.css";
+
+
+
+/* variables */
+:root {
+
+    --itemIcon: url("./img/folderClosed24.png");
+    --itemOpenIcon: url("./img/folderOpened24.png");
+    --indexIcon: url("./img/index128.png");
+
+}
+
+li {
+
+
+    margin-left: 15px;
+
+
+
+}
+
+.nested {
+    display: none;
+  }
+  
+  .active {
+    display: block;
+  }
+  
+
+
+/* Grid container  */
+.container{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr .1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-gap: 3px;
+  
+    border-style: solid;
+    border-color: var(--keycolor);
+    border-width: 1px;
+    border-radius: 5px;
+  
+    height: 100vh;
+}
+
+  .videoContainer{
+    background-color: rgb(16, 16, 90);
+    grid-row: span 6;
+    grid-column: span 4;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+  }
+
+
+  .indexContainer{
+    background-color: rgb(16, 16, 90);
+    grid-row: span 6;
+    grid-column: 5;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+  }
+
+
+
+
+  .treeContainer{
+    grid-row: span 6;
+    grid-column: 6;
+    display: grid;
+  }
+
+  .treeRoot{
+   margin-left: 10px;
+   color: aquamarine;
+  }
+
+
+  .indexIcon {
+
+    background-color: rgb(16, 16, 90);
+
+    }
+
+    .indexIcon:hover {
+
+  
+      transform: scale(1);
+  
+      }
+  
+
+
+  .indexIcon::before {
+  content: var(--indexIcon);
+  transform: scale(0.5);
+  display: inline-block;
+
+  }
+
+

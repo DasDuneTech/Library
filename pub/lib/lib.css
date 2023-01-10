@@ -1,0 +1,315 @@
+@import url('https://fonts.googleapis.com/css2?family=Armata&family=Roboto&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css');
+
+* {
+  margin: 0;
+  padding: 0;
+  /* overflow: hidden; */
+}
+
+/* variables */
+:root {
+
+  /* base */
+  --bgColor: #052a42;
+  --color1: #206c9e;
+  --color2: #94b0c4;
+  --boxShadow: #206c9e 1px 1px;
+  --boxShadowHover:   #206c9e -3px -3px;
+  --boxShadowBorderColor: #121516 -3px -3px;
+  --debugVisible: hidden;
+  --tooltipVisible: visible;
+
+  /* Body*/
+  --bodybgColor: #052a42;
+  --bodyFontFamily:'Roboto';
+  --bodyFontSize:16px;
+
+    /* info bubbles*/
+  --bubblePadding: 0.7em;
+  --bubbleBorderRadius: 100px;
+  --bubbleFontSize: 0.85em;
+  --bubbleBackground: yellow;
+  --bubbleColor: black;
+  --bubbleOpacity: .75;
+  --bubbleOpacityTransition: 3s;
+
+  /* TL Logo*/
+
+  /* titles */ 
+  --titleFontSize: 3em;
+  --title2FontSize: 2em;
+  --title3FontSize: 1.5em;
+
+
+
+
+  /* user */ 
+  /* --userFontSize: 1.5em; */
+  --userAccessLevel: "no access";
+  --userAccessLevelIcon: url("img/noAccess32.png");
+  /* --userAccessLogoPopupColor:#d7e612; */
+
+
+    /* icons */
+  --googledriveIcon: url("img/googledrive20.png");
+  --onedriveIcon: url("img/onedrive20.png");
+  --sheetsIcon20: url("img/sheets20.png");
+  --sheetsIcon48: url("img/sheets48.png");
+  --sheetIcon20: url("img/sheet20.png");
+  --sheetIcon48: url("img/sheet48.png");
+  --tagsIcon48: url("img/tags48.png");
+  --indexIcon48: url("img/index48.png");
+  --indexIcon64: url("img/index64.png");
+  --trashIcon64: url("img/trash64.png");
+  --viewIcon48: url("img/view48.png");
+  --viewIcon64: url("img/view64.png");
+  --helpIcon48: url("img/help48.png");
+  --helpIcon32: url("img/help32.png");
+  --drawerIcon22: url("img/drawer22.png");
+  --drawerBlueIcon22: url("img/drawerBlue22.png");
+  --libraryIcon128: url("img/library128.png");
+  --foldersIcon: "\1F5C1";
+  --folderIcon: "\1F5C1";
+  --folderOpenIcon:"\1F5BF";
+  --folderCloseIcon:"\1F5C1";
+  --treeItem: #66adc8;
+  --color4: #0d3550;
+  --folderHoverColor: #eff3f7;
+  --folderCloseColor: #94b0c4;
+  --folderOpenColor: #ddda18;
+
+  /* key/val */
+  --keyColor: #d7e612;
+  --valColor: #94b0c4;
+  --valBorderColor: #94b0c4;
+
+  /* user  */
+
+  /*content */
+  --sheetTagsTotal: "000";
+  --indexSheetTagsTotal: "000";
+  --helpText: "";
+  --debugText: "";
+
+
+}
+
+/*scroll bar styling */
+
+::-webkit-scrollbar {
+
+  background:var(--keyColor);
+  border-style: solid;
+  border-color: var(--color4);
+  border-radius: 5px;
+  width: 10px;
+  height: 10px;
+
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bgColor);
+  /* border-style: solid;
+  border-color: var(--color4);
+  border-radius: 5px; */
+
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color1);
+  border-radius: 5px;
+
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color2);
+}
+
+#snackbar {
+  visibility: hidden;
+  min-width: 250px;
+  margin-left: -125px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  border-radius: 5px;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  left: 50%;
+  bottom: 30px;
+  font-size: 17px;
+}
+
+/* DOM elements  */
+body {
+    background: var(--bodybgColor);
+    font-family: var(--bodyFontFamily);
+    font-size: var(--bodyFontSize);
+  }
+  
+  h3{
+    color:var(--color2);
+  }
+  
+  button  {
+  
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+  
+  }
+  
+  ul {
+    list-style-type: none;
+  }
+  
+  /* li{
+  
+    margin-left: 25px;
+    color:var(--treeItem);
+  } */
+  
+  li:hover{
+  
+    color:var(--folderHoverColor);
+    }
+  
+  option {
+  
+  background-color: var(--bgColor);
+  
+  }
+
+  /* Grid container  */
+.container{
+
+    display: grid;
+    grid-template-columns: 1fr 9fr;
+    grid-template-rows: 1fr 9fr;
+    grid-gap: 3px;
+  
+    border-style: solid;
+    border-color: var(--keycolor);
+    border-width: 1px;
+    border-radius: 5px;
+  
+    height: 100vh;
+    /* overflow: auto;  */
+  
+  }
+  
+  /* Grid boxes  */
+  .boxes {
+  
+    color:var(--color2);
+    border-style: solid;
+    border-color: var(--keycolor);
+    border-width: 1px;
+    border-radius: 5px;
+  
+  }
+  
+  /* TL Logo */
+  .box1 {
+    position: relative;
+    --debugText: "CSS - Box 1";
+    grid-column: 1 ;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  
+  }
+  
+  .box1::after{
+  
+  position: absolute;
+  
+  
+  }
+  
+  .tlLogo{
+  
+    /* margin-left: 1em; */
+    /* margin: auto; */
+    width: 5em;
+    /* font-size: 20px; */
+    padding: 1em;
+  
+  }
+  
+  /* Title */
+  .box2 {
+    --helpText: var(--userAccessLevel);
+  
+    grid-column: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  
+  }
+  
+  .title{
+    --debugText: "CSS - Box 2";
+    --helpText: "Tags Indexing make TagLinker aware about them and find them in your documents";
+    color:var(--color2);
+    /* font-size: var(--titleFontSize); */
+  
+    }
+  
+  
+  
+  /* Folders tree*/
+  .box3 {
+  
+    --debugText: "CSS - Box 3";
+    position: relative;
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+  
+  }
+  
+   /* content */
+  .box4 {
+    --debugText: "CSS - Box 4";
+    grid-row: 2;
+    grid-column: 2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+  
+  }
+
+  .foldersTree{
+
+    margin-top: 1em;
+    width: 100%;
+    overflow:auto;
+
+  }
+
+  .folders {
+    cursor: pointer;
+    user-select: none;
+  }
+  
+  .folders::before {
+    content: var(--foldersIcon);
+    color: var(--folderCloseColor);
+    display: inline-block;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  
+  .folders-click::before {
+    transform: rotate(90deg);  
+    /* content: var(--folderCloseIcon); */
+    /* color: var(--folderOpenColor); */
+  }
+  
