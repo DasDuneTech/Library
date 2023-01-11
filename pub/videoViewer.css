@@ -46,6 +46,7 @@
 
   .title {
 
+    font-size: 1em;
     color:aquamarine;
     margin-left: 10px;
   }
@@ -61,7 +62,7 @@
 
   .desc {
 
-    font-size: .75em;
+    font-size: .9em;
     color:chocolate;
     margin-left: 15px;
   }
@@ -71,13 +72,13 @@
 
   
   .time {
-    font-size: .6em;
+    font-size: 1em;
     color:yellow;
     margin-left: 20px;
   }
 
   .timeDesc {
-    font-size: .6em;
+    font-size: .8em;
     color:gray;
     margin-left: 20px;
   }

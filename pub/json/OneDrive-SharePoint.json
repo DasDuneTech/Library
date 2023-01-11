@@ -1,0 +1,23 @@
+{
+    "url": "https://firebasestorage.googleapis.com/v0/b/library-d3254.appspot.com/o/Microsoft-OneDrive-Overview.mp4?alt=media&token=f7bfa07c-79b6-446f-8d4f-674f49201739",
+    "title": "OneDrive-SharePoint",
+    "desc": "Development with JavaScript",
+    "indexes": [
+        {
+            "time": "0",
+            "desc": "no intro ?"
+        },
+        {
+            "time": "109",
+            "desc": "MS-Graph Explorer - List Sites"
+        },
+        {
+            "time": "376",
+            "desc": "Office Business - Admin"
+        },
+        {
+            "time": "432",
+            "desc": "SharePoint & Documents Libraries"
+        }
+    ]
+}

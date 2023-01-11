@@ -144,7 +144,7 @@ input{
    margin-left: 10px;
    height: 3rem;
    padding-left: 1em;
-   font-size: 1.25em;
+   font-size: 1em;
    color: whitesmoke;
   }
 
@@ -152,7 +152,7 @@ input{
     margin-left: 15px;
     height: 3rem;
     padding-left: 1em;
-    font-size: 1.25em;
+    font-size: .9em;
     color: chocolate;
    }
 
@@ -161,6 +161,15 @@ input{
     display:flex;
     align-items: center;
 
+  }
+
+
+
+  .desc {
+
+    font-size: .9em;
+    color:chocolate;
+    margin-left: 15px;
   }
 
 
