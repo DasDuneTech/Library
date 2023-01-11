@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1"> -->
+  <!-- <link rel="stylesheet" href='https://taglinker-admin.web.app/tags.css'>
+  <script defer type='module' src='https://taglinker-admin.web.app/tags.js'></script> -->
+  <link rel="stylesheet" href='./videoIndexer.css'>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.0/FileSaver.min.js'></script>
+  <script defer type='module' src='./videoIndexer.js'></script>
+  <!-- <link rel="stylesheet" href='./test.css'> -->
+  <title>Video Editor</title>
+</head>
+
+<body>
+ 
+
+  <div id="container" class="container">
+
+    <div id="videoUrlContainer" class="videoUrlContainer">
+      <input id="videoUrl", class="videoUrl" value="video URL">
+      <i id="downloadIcon" class="downloadIcon"></i>
+    </div>
+
+    <div id="saveContainer" class="saveContainer">
+      <i id="saveIcon" class="saveIcon"></i>
+    </div>
+
+
+    <div id="videoContainer" class="videoContainer">
+      <video id="video" width="1280" height="1024" controls>
+        <!-- <source src="./videos/test.mp4" type="video/mp4"> -->
+        <!-- <source src="https://onedrive.live.com/?cid=D8C04D79A06C919A&id=D8C04D79A06C919A%21215518&parId=D8C04D79A06C919A%21213673&o=OneUp"> -->
+        <!-- <source src="https://firebasestorage.googleapis.com/v0/b/taglinker-4ee7c.appspot.com/o/0-DDT3DLogo.mp4?alt=media&token=cdca84ba-624a-4b08-b9aa-38839bd72b8a"> -->
+
+      </video>
+    </div>  
+
+    <div id="indexContainer" class="indexContainer">
+      <i id="indexIcon" class="indexIcon"></i>
+    </div>  
+
+
+
+    <div id="treeContainer" class="treeContainer">
+      <input class="videoTitle" value="Video Title">
+      <input class="videoDesc" value="Video Description">
+
+      <!-- <div class="videoChapter">
+        <div class="time">12</div>
+        <input class="chapter" value="chapter description">
+      </div>  
+      <div class="videoChapter">
+        <div class="time">12</div>
+        <input class="chapter" value="chapter description">
+      </div>   -->
+
+    </div>  
+  </div>  
+
+
+</body>
+
+</html>

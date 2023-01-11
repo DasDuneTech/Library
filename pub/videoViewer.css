@@ -1,0 +1,90 @@
+@import "./lib/lib.css";
+
+/* variables */
+:root {
+
+    --itemIcon: url("./img/folderClosed24.png");
+    --itemOpenIcon: url("./img/folderOpened24.png");
+    --indexIcon: url("./img/index128.png");
+    --bookmarkIcon: url("./img/bookmark24.png");
+    --downloadIcon: url("./img/download128.png");
+    --saveIcon: url("./img/sheet128.png");
+}
+
+
+/* Grid container  */
+.container{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr .1fr 1fr;
+    grid-template-rows: .1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-gap: 3px;
+  
+    border-style: solid;
+    border-color: var(--keycolor);
+    border-width: 1px;
+    border-radius: 5px;
+  
+    height: 100vh;
+}
+
+.treeContainer{
+    grid-row: 2;
+    grid-column: 1;
+    display: grid;
+    align-content: center;
+
+  }
+
+.videoContainer{
+    background-color: rgb(16, 16, 90);
+    grid-row: span 6;
+    grid-column: span 5;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .title {
+
+    color:aquamarine;
+    margin-left: 10px;
+  }
+
+
+  .title:hover {
+
+    color:white;
+    cursor: pointer;
+  }
+
+
+
+  .desc {
+
+    font-size: .75em;
+    color:chocolate;
+    margin-left: 15px;
+  }
+
+
+  .timeInfo{display: flex;}
+
+  
+  .time {
+    font-size: .6em;
+    color:yellow;
+    margin-left: 20px;
+  }
+
+  .timeDesc {
+    font-size: .6em;
+    color:gray;
+    margin-left: 20px;
+  }
+
+  .timeDesc:hover {
+
+    color:white;
+    cursor: pointer;
+
+  }
