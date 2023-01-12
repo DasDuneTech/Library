@@ -1,0 +1,22 @@
+{
+    "FBInit": {
+        "apiKey": "AIzaSyBNNeqHgaHZPk6bmiCvHGkaaDqlpuuB9VY",
+        "authDomain": "taglinker-server.firebaseapp.com",
+        "projectId": "taglinker-server",
+        "storageBucket": "taglinker-server.appspot.com",
+        "messagingSenderId": "1000586769793",
+        "appId": "1:1000586769793:web:836b9645d784c9b6dce480",
+        "measurementId": "G-GX0TBXFMQ6"
+    },
+    "sockServer": "http://localhost:3000",
+    "tlClient": "./pub/",
+    "tlServer": "http://localhost:8080",
+    "urlSheetsPrefix": "https://docs.google.com/spreadsheets/d/",
+    "bucket": "gs://taglinker-server.appspot.com",
+    "sep": "-",
+    "tagMin": 7,
+    "clientCloud": "Google",
+    "tenantId": "common",
+    "siteId": "",
+    "guest": false
+}

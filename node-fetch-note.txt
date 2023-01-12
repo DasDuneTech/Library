@@ -1,0 +1,5 @@
+What I found is that the latest version of node-fetch changed to ES modules by default. You can:
+
+Uninstall the current version of node-fetch with npm uninstall node-fetch
+Install the second version: npm install node-fetch@2
+It has worked for me!
