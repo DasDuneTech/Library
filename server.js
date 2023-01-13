@@ -9,6 +9,7 @@ require('dotenv').config()
 const port = 8080;
 const appId = process.env.GOOGLE_OAUTH2_APP_ID
 const secret = process.env.GOOGLE_OAUTH2_APP_SECRET
+const refreshToken = process.env.GOOGLE_OAUTH2_REFRESH_TOKEN
 const refreshTokenUrl = `https://oauth2.googleapis.com/token`
 
 app.listen(port, () => {
@@ -28,16 +29,12 @@ app.get('/getAccessToken', async (req, res) => {
     res.send(accessToken)}
         )
 
-
-
-
-
 //* Google stuff
 
 //get a fresh access token
 const getAccessToken = async() => {
 
-    const rToken = fs.readFileSync('oauth2RefreshToken.txt', 'utf8') 
+    const rToken = refreshToken
     const formData2 = new FormData();
     formData2.append('client_id', appId);
     formData2.append('grant_type', 'refresh_token');
