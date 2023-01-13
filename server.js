@@ -12,6 +12,8 @@ const secret = process.env.GOOGLE_OAUTH2_APP_SECRET
 const refreshToken = process.env.GOOGLE_OAUTH2_REFRESH_TOKEN
 const refreshTokenUrl = `https://oauth2.googleapis.com/token`
 
+let token = {expires_in:0}
+
 app.listen(port, () => {
     console.log(`Server listening at port ${port}`);
 });
@@ -19,17 +21,38 @@ app.listen(port, () => {
 // JSON parsing
 app.use(express.json({ limit: '50mb' }));
 
+// check if access token is valid
+app.use(async (req, res, next) => {
+    if (token.expires_in < 60) await getAccessToken()
+    next()
+})
+
 //* http requests
 
-app.get('/', async (req, res) => {res.send(`Hello`)})
+app.get('/', async (req, res) => {res.send(`TagLinker Library`)})
 
-app.get('/getAccessToken', async (req, res) => {
+// app.get('/getAccessToken', async (req, res) => {
     
-    let accessToken = await getAccessToken()
-    res.send(accessToken)}
-        )
+//     accessToken = await getAccessToken()
+//     res.send(accessToken)})
+
+app.get('/getSheetsValues', async (req, res) => {
+
+    let range = req.query.range
+    let info = await getSheetsValues(range)
+    res.send(info)})
 
 //* Google stuff
+
+// //get a fresh access token
+// const checkAccessToken = async(accessToken) => {
+
+//     if (accessToken.expires_in < 60) {
+//     await getAccessToken()
+//     }
+//     return
+
+// }
 
 //get a fresh access token
 const getAccessToken = async() => {
@@ -44,7 +67,6 @@ const getAccessToken = async() => {
     let url = `${refreshTokenUrl}`
 
     try {
-
         let res = await fetch(url, 
             {
             method: 'POST',    
@@ -52,7 +74,7 @@ const getAccessToken = async() => {
         });
 
         let data  = await res.json()
-        if (res.ok) {return(data.access_token)}
+        if (res.ok) {return(token = data)}
         else throw `error getting the access token : code : ${res.status}(${res.statusText}) - ${data.error} - ${data.error_description}`
     }
     catch(err) {
@@ -65,21 +87,18 @@ const getAccessToken = async() => {
 }
 
 //get sheet info from Google sheets (values or formulas)
-getSheetValues = async(sheetInfo) => {
+getSheetsValues = async(range) => {
 
-    const {suffix, sheetName, range, isFormulas} = sheetInfo
-    
     try {
 
-        // let bookId = `` 
-        // sheetsFilesList.map((item) => {if (item.name === bookName) bookId = item.id})
-
+        let sheetsId= `1SjOk0X2rIYs6UBaGP2k_JCeJpx9H5ZgibIErgQHp1tU`
+        let sheetName = `Library`
         let range2 = range === undefined ? `` : `!${range}`
-        let formulas = isFormulas ? `?valueRenderOption=FORMULA` : ``
+        let formulas = `?valueRenderOption=FORMULA`
 
-        let url = `https://sheets.googleapis.com/v4/spreadsheets/${suffix}/values/${sheetName}${range2}${formulas}`
+        let url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsId}/values/${sheetName}${range2}${formulas}`
 
-        let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token}});
+        let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token.access_token}});
         let data  = await res.json()
         let info = res.ok ? data : `getSheetInfo :: http request error : ${data.error.message}`
         return(info)
