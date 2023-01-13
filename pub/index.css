@@ -1,0 +1,36 @@
+@import "./lib/lib.css";
+
+/* variables */
+:root {
+
+    --itemIcon: url("./img/folderClosed24.png");
+    --itemOpenIcon: url("./img/folderOpened24.png");
+
+}
+
+/* Grid container  */
+.container{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-gap: 3px;
+  
+    border-style: solid;
+    border-color: var(--keycolor);
+    border-width: 1px;
+    border-radius: 5px;
+  
+    height: 100vh;
+}
+
+
+.title {
+
+    font-size: 3em;
+    background-color: rgb(16, 16, 90);
+    grid-row: span 6;
+    grid-column: span 6;
+    display: grid;
+    align-items: center;
+    justify-content: center;
+}
