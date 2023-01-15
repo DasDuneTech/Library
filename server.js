@@ -21,7 +21,7 @@ app.listen(port, () => {
 // JSON parsing
 app.use(express.json({ limit: '50mb' }));
 
-// check if access token is valid
+// check if access token is valid on every request
 app.use(async (req, res, next) => {
     if (token.expires_in < 60) await getAccessToken()
     next()
@@ -31,28 +31,33 @@ app.use(async (req, res, next) => {
 
 app.get('/', async (req, res) => {res.send(`TagLinker Library`)})
 
-// app.get('/getAccessToken', async (req, res) => {
-    
-//     accessToken = await getAccessToken()
-//     res.send(accessToken)})
-
 app.get('/getSheetsValues', async (req, res) => {
 
     let range = req.query.range
-    let info = await getSheetsValues(range)
-    res.send(info)})
+
+    try {
+
+        let sheetsId= `1SjOk0X2rIYs6UBaGP2k_JCeJpx9H5ZgibIErgQHp1tU`
+        let sheetName = `Library`
+        let range2 = range === undefined ? `` : `!${range}`
+        let formulas = `?valueRenderOption=FORMULA`
+
+        let url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsId}/values/${sheetName}${range2}${formulas}`
+
+        let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token.access_token}});
+        let data  = await res.json()
+        let info = res.ok ? data : `getSheetInfo :: http request error : ${data.error.message}`
+        res.send("info")
+
+    }
+    catch(err) {
+        console.log(err.message)
+        res.send(err.message)
+    }
+
+})
 
 //* Google stuff
-
-// //get a fresh access token
-// const checkAccessToken = async(accessToken) => {
-
-//     if (accessToken.expires_in < 60) {
-//     await getAccessToken()
-//     }
-//     return
-
-// }
 
 //get a fresh access token
 const getAccessToken = async() => {
@@ -84,29 +89,6 @@ const getAccessToken = async() => {
         return {error: `error getting the access token`}
     }
 
-}
-
-//get sheet info from Google sheets (values or formulas)
-getSheetsValues = async(range) => {
-
-    try {
-
-        let sheetsId= `1SjOk0X2rIYs6UBaGP2k_JCeJpx9H5ZgibIErgQHp1tU`
-        let sheetName = `Library`
-        let range2 = range === undefined ? `` : `!${range}`
-        let formulas = `?valueRenderOption=FORMULA`
-
-        let url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsId}/values/${sheetName}${range2}${formulas}`
-
-        let res = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token.access_token}});
-        let data  = await res.json()
-        let info = res.ok ? data : `getSheetInfo :: http request error : ${data.error.message}`
-        return(info)
-    }
-    catch(err) {
-        console.log(err.message)
-        return(err.message)
-    }
 }
 
 //update sheet

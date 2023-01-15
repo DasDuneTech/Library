@@ -2,7 +2,10 @@
 import {popEle} from './lib/lib.js'
 
 let videosList
+// let serverUrl = `https://library-qm2c6ml5ua-uc.a.run.app`
+let serverUrl = `http://localhost:8080`
 
+//check if video title already exists, if yes, fill the chapters tree with its info
 document.getElementById(`videoTitle`).addEventListener('change', async() =>{ 
 
   let title = document.getElementById(`videoTitle`).value
@@ -11,7 +14,7 @@ document.getElementById(`videoTitle`).addEventListener('change', async() =>{
   }
   else {
  
-        let res = await fetch(`./json/${title}.json`)
+        let res = await fetch(`./json/${title}.json`, {mode: 'cors'})
             let data = await res.text()
             let videoInfo = JSON.parse(data)
             const {url, desc, indexes} = videoInfo
@@ -32,7 +35,7 @@ document.getElementById(`videoTitle`).addEventListener('change', async() =>{
 
  })
 
-
+// index chapter
 document.getElementById(`indexIcon`).addEventListener('click', () =>{
 
   let ele = popEle({e:`div`, c:`videoChapter`, p:document.getElementById('treeContainer')})
@@ -81,8 +84,24 @@ const createFile = (title, jsonFile) => {
 
 const init = (async() => {
 
-  let res = await fetch(`./json/videosList.json`)
-  videosList = await res.text()
+  // let res = await fetch(`./json/videosList.json`)
+  // videosList = await res.text()
+  let res = await fetch(`${serverUrl}/getSheetsValues`)
+  let data = await res.json()
+
 
 })() 
+
+
+
+
+const readSheetsInfo= (async() => {
+
+
+        let res = await fetch(`${serverUrl}/getSheetsValues`, {mode: 'no-cors'})
+        let data = await res.json()
+
+
+})
+
 

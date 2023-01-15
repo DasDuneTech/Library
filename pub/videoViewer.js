@@ -1,6 +1,9 @@
 //common library
 import {popEle} from './lib/lib.js'
 
+// let serverUrl = `https://library-qm2c6ml5ua-uc.a.run.app`
+let serverUrl = `http://localhost:8080`
+
 
 const popVideoTitles = async(e) => {
 
@@ -42,8 +45,21 @@ const popVideoTitles = async(e) => {
 
 const init = (async() => {
 
-    let res = await fetch(`./json/videosList.json`)
+    // let res = await fetch(`${serverUrl}/getSheetsValues`, {
+        let res = await fetch(`${serverUrl}/`, {
+
+        method: 'GET',
+        mode: 'no-cors',
+
+
+    })
+
+    console.log(res.ok)
+
     let data = await res.text()
+
+    // let res = await fetch(`./json/videosList.json`)
+    // let data = await res.text()
   
     let videosList = JSON.parse(data)
     const {list} = videosList
