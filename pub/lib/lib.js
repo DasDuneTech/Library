@@ -15,7 +15,7 @@ let config
 export const readConfig = async() => {
   try {
 
-    let res = await fetch('/pub/config.json');
+    let res = await fetch('./pub/config.json');
     let data = await res.json()
     if (res.ok) {
       config = data
