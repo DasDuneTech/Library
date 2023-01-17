@@ -92,8 +92,6 @@ const init = (async() => {
         if (row[0] !== ``) console.log(`New video ${row[0]} Description ${row[1]} Link ${row[2]} `)
         else console.log(`Time ${row[3]} Description ${row[1]}`)
 
-
-
     })
 })
 

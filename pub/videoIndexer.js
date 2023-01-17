@@ -1,107 +1,146 @@
 //common library
 import {popEle} from './lib/lib.js'
 
-let videosList
 // let serverUrl = `https://library-qm2c6ml5ua-uc.a.run.app`
 let serverUrl = `http://localhost:8080`
+let arrPrefix, arrSuffix = []
+let indexStart
+let videosListArr = []
 
 //check if video title already exists, if yes, fill the chapters tree with its info
 document.getElementById(`videoTitle`).addEventListener('change', async() =>{ 
 
   let title = document.getElementById(`videoTitle`).value
-  if (!videosList.match(title)) {
-    let ele = popEle({e:`input`, c:`videoDesc`, v:`Video description`, p:document.getElementById('treeContainer')})
+  let isTitleExists = false
+  let videoDescDone = false
+  
+  for (let row of videosListArr) {
+
+    //check if video info exists 
+    if (row[0] === title || isTitleExists) 
+    {
+      isTitleExists = true
+    
+      //process video desc only once
+      if (row[0] !==`` && !videoDescDone) 
+        {
+
+          let parent = document.getElementById('treeContainer')
+          while (parent.childNodes[2]) {parent.removeChild(parent.childNodes[2])}
+
+          document.getElementById(`videoUrl`).value = row[3]
+          document.getElementById(`video`).src = document.getElementById(`videoUrl`).value
+          popEle({e:`input`, c:`videoDesc`, v:row[1], p:document.getElementById('treeContainer')})
+          videoDescDone = true
+          indexStart = videosListArr.indexOf(row)
+          arrPrefix = videosListArr.slice(0, indexStart)
+          arrSuffix=[]
+          continue
+        }
+
+        //process all the chapters
+        if (row[0] !==``) {
+          arrSuffix =videosListArr.slice(videosListArr.indexOf(row))
+          return
+        }
+        let ele = popEle({e:`div`, c:`videoChapter`, p:document.getElementById('treeContainer')})
+        let time = popEle({e:`div`, c:`time`, t:row[2], p:ele})
+        time.addEventListener('click', (e) =>{e.target.parentElement.remove()})
+        popEle({e:`input`, c:`chapter`, v: row[1], p:ele})  
+    }
   }
-  else {
- 
-        let res = await fetch(`./json/${title}.json`, {mode: 'cors'})
-            let data = await res.text()
-            let videoInfo = JSON.parse(data)
-            const {url, desc, indexes} = videoInfo
+})
 
-            let ele = popEle({e:`input`, c:`videoDesc`, v:desc, p:document.getElementById('treeContainer')})
-            // let ele2 = popEle({e:`div`, c:`timeInfo`, p:document.getElementById('test')})
-
-            indexes.map((item) => {
-
-              let ele = popEle({e:`div`, c:`videoChapter`, p:document.getElementById('treeContainer')})
-              let time = popEle({e:`div`, c:`time`, t:item.time, p:ele})
-              time.addEventListener('click', (e) =>{e.target.parentElement.remove()})
-              let chapter = popEle({e:`input`, c:`chapter`, v: item.desc, p:ele})
-            })
-
-
-  }
-
- })
-
-// index chapter
+// index chapters
 document.getElementById(`indexIcon`).addEventListener('click', () =>{
 
   let ele = popEle({e:`div`, c:`videoChapter`, p:document.getElementById('treeContainer')})
   let time = popEle({e:`div`, c:`time`, p:ele})
   time.addEventListener('click', (e) =>{e.target.parentElement.remove()})
   time.textContent = Math.round(document.getElementById(`video`).currentTime).toString()
-  let chapter = popEle({e:`input`, c:`chapter`, v:`put chapter comment`, p:ele})
+  popEle({e:`input`, c:`chapter`, v:`put chapter comment`, p:ele})
 })
 
+// download video
 document.getElementById(`downloadIcon`).addEventListener('click', () =>{
   document.getElementById(`video`).src = document.getElementById(`videoUrl`).value
 })
 
-document.getElementById(`saveIcon`).addEventListener('click', () =>{
-  let videoInfo = [...document.getElementById(`treeContainer`).children]
+//save video info
+document.getElementById(`saveIcon`).addEventListener('click', async() =>{
+  let videoInfoEle = [...document.getElementById(`treeContainer`).children]
 
-  let videoUrl = {url:document.getElementById(`videoUrl`).value}
-  let title = videoInfo[0].value
-  let videoTitle = {title: videoInfo[0].value}
-  let videoDesc = {desc: videoInfo[1].value}
-  videoInfo.shift()  
-  videoInfo.shift()
+  let videoRowInfo = []
+  let videoInfo = []
 
-  let chaptersArr = []
-  let obj
-  for (let item of videoInfo) {
+  //Push header info
+  videoRowInfo.push(videoInfoEle[0].value)
+  videoRowInfo.push(videoInfoEle[1].value)
+  videoRowInfo.push(``)
+  videoRowInfo.push(document.getElementById(`videoUrl`).value)
+  videoInfo.push(videoRowInfo)
 
-    obj = {time:item.children[0].textContent, desc:item.children[1].value}
-    chaptersArr.push(obj)
+  //Get rid of title and desc
+  videoInfoEle.shift()  
+  videoInfoEle.shift()
+
+  //Push chapters info
+  for (let item of videoInfoEle) {
+
+    videoRowInfo = []
+    videoRowInfo.push(``)
+    videoRowInfo.push(item.children[1].value)
+    videoRowInfo.push(parseInt(item.children[0].textContent))
+    videoRowInfo.push(``)
+    videoInfo.push(videoRowInfo)
   }
-  let chapters= {indexes:chaptersArr}
-  let videoInfoObj = {...videoUrl, ...videoTitle, ...videoDesc, ...chapters}
-  createFile(title, JSON.stringify(videoInfoObj)) 
+
+  let videoInfoAll = [...arrPrefix, ...videoInfo, ...arrSuffix] 
+
+  //clear sheet before rewriting in case the new range is less than the current range
+  let info = {range:`A2:D${videosListArr.length + 100}`} 
+  let idToken = `whocare`
+  try {
+    let res = await fetch(`${serverUrl}/clear`, 
+    { method: `POST`,
+      headers: {'Content-Type': `application/json`},
+      body:JSON.stringify(info)})
+    if(!res.ok) throw `Cannot clear the sheet :: ${res.statusText}`
+    
+    //set new video info
+    info = {range:`A2:D${videoInfoAll.length + 1}`, values:videoInfoAll} 
+
+    //update sheet
+    res = await fetch(`${serverUrl}/update`, 
+    { method: `POST`,
+      headers: {'Content-Type': `application/json`},
+      body:JSON.stringify(info)})
+    if(!res.ok) throw `Cannot update the sheet :: ${res.statusText}`
+  }
+  catch(err){
+    console.trace()
+    console.log(err)
+  }
 })
-
-
-
-const createFile = (title, jsonFile) => {
-    var blob = new Blob([jsonFile], {
-        type: "text/plain;charset=utf-8",
-    });
-    saveAs(blob, `${title}.json`);
-  }
-
-
 
 const init = (async() => {
 
-  // let res = await fetch(`./json/videosList.json`)
-  // videosList = await res.text()
-  let res = await fetch(`${serverUrl}/getSheetsValues`)
-  let data = await res.json()
-
-
+  try {
+    //get videos info list
+    let res = await fetch(`${serverUrl}/getSheetsValues`)
+    if(!res.ok) throw `Cannot read the sheet :: ${res.statusText}`
+    let data = await res.json()
+    data.values.shift()
+    videosListArr =data.values
+    
+    //starts with full list array if title not found
+    arrPrefix = videosListArr
+  }
+  catch(err){
+    console.trace()
+    console.log(err)
+  }
 })() 
 
-
-
-
-const readSheetsInfo= (async() => {
-
-
-        let res = await fetch(`${serverUrl}/getSheetsValues`, {mode: 'no-cors'})
-        let data = await res.json()
-
-
-})
 
 
