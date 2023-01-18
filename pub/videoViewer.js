@@ -1,8 +1,8 @@
 //common library
 import {popEle} from './lib/lib.js'
 
-// let serverUrl = `https://library-qm2c6ml5ua-uc.a.run.app`
-let serverUrl = `http://localhost:8080`
+let serverUrl = `https://library-qm2c6ml5ua-uc.a.run.app`
+// let serverUrl = `http://localhost:8080`
 let videosListArr = []
 let ele, ele2
 let currentId
