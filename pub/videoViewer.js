@@ -3,37 +3,90 @@ import {popEle} from './lib/lib.js'
 
 // let serverUrl = `https://library-qm2c6ml5ua-uc.a.run.app`
 let serverUrl = `http://localhost:8080`
+let videosListArr = []
+let ele, ele2
+let currentId
 
+
+ //folders tree toggle function on click event
+let toggle = async(e) => {
+    [...e.target.parentElement.querySelectorAll(".nested")].map( i => i.classList.toggle("active"))
+    if (e.target.nextSibling.className.includes(`active`)) {
+        currentId = e.target.id
+        if (document.getElementById(`video`).src !== e.target.dataset.url) document.getElementById(`video`).src = e.target.dataset.url
+    }
+    console.log(`stop`)
+    // let toggleType = `item-clicked`
+    // e.target.classList.toggle(toggleType)
+  }
 
 const popVideoTitles = async(e) => {
 
     if (e.target.className !== `title`) return
+    if (e.target.children.length !== 0) {
+        
+        if (document.getElementById(`video`).src !== e.target.dataset.url) document.getElementById(`video`).src = e.target.dataset.url
+        return 
+    }
 
-    if (e.target.children.length !== 0) return 
+    let title = e.target.textContent
 
-    let res = await fetch(`./json/${e.target.textContent}.json`)
-        let data = await res.text()
+    let isTitleExists = false
+    let videoDescDone = false
 
-        let videoInfo = JSON.parse(data)
-        const {url, desc, indexes} = videoInfo
+    for (let row of videosListArr) {
 
-        document.getElementById(`video`).src = url
+        if (row[0] === title || isTitleExists) 
+        {
+          isTitleExists = true
 
-        let ele = popEle({e:`h2`, c:`desc`, t:desc, p:document.getElementById(e.target.id)})
-        // let ele2 = popEle({e:`div`, c:`timeInfo`, p:document.getElementById('test')})
+            //process video desc only once
+            if (row[0] !==`` && !videoDescDone) 
+                {
+                    document.getElementById(`video`).src = row[3]
+                    popEle({e:`h2`, c:`desc`, t:row[1], p:e.target})
+                    videoDescDone = true
+                    continue
+                }
 
-        indexes.map((item) => {
-
-            ele = popEle({e:`div`, c:`timeInfo`, p:document.getElementById(e.target.id)})
+            //process all the chapters
+            if (row[0] !== ``) return
+            // let ele = popEle({e:`div`, c:`timeInfo`, p:e.target})
             // popEle({e:`h3`, c:`time`, t:item.time, p:ele})
-            ele = popEle({e:`h3`, c:`timeDesc`, t:item.desc, p:ele})
+            let ele = popEle({e:`h3`, i:row[2], c:`timeDesc`, t:row[1], p:e.target})
             ele.addEventListener('click', (e) =>{
-                document.getElementById(`video`).currentTime = item.time
+                if (document.getElementById(`video`).src !== e.target.dataset.url) document.getElementById(`video`).src = e.target.parentElement.dataset.url
+                document.getElementById(`video`).currentTime = e.target.id
                 e.stopPropagation()
              })
+        }
+    }
+
+
+
+    // let res = await fetch(`./json/${e.target.textContent}.json`)
+    //     let data = await res.text()
+
+    //     let videoInfo = JSON.parse(data)
+    //     const {url, desc, indexes} = videoInfo
+
+    //     document.getElementById(`video`).src = url
+
+    //     let ele = popEle({e:`h2`, c:`desc`, t:desc, p:document.getElementById(e.target.id)})
+    //     // let ele2 = popEle({e:`div`, c:`timeInfo`, p:document.getElementById('test')})
+
+    //     indexes.map((item) => {
+
+    //         ele = popEle({e:`div`, c:`timeInfo`, p:document.getElementById(e.target.id)})
+    //         // popEle({e:`h3`, c:`time`, t:item.time, p:ele})
+    //         ele = popEle({e:`h3`, c:`timeDesc`, t:item.desc, p:ele})
+    //         ele.addEventListener('click', (e) =>{
+    //             document.getElementById(`video`).currentTime = item.time
+    //             e.stopPropagation()
+    //          })
         
 
-        })
+    //     })
 
         // popEle({e:`h3`, c:`time`, t:`1`, p:ele2})
         // popEle({e:`h3`, c:`timeDesc`, t:`Chapter 1`, p:ele2})
@@ -45,29 +98,64 @@ const popVideoTitles = async(e) => {
 
 const init = (async() => {
 
-    // let res = await fetch(`${serverUrl}/getSheetsValues`, {
-        let res = await fetch(`${serverUrl}/`, {
+    try {
+        //get videos info list
+        let res = await fetch(`${serverUrl}/getSheetsValues`)
+        if(!res.ok) throw `Cannot read the sheet :: ${res.statusText}`
+        let data = await res.json()
+        data.values.shift()
+        videosListArr = data.values
 
-        method: 'GET',
-        mode: 'no-cors',
+        for (let row of videosListArr) {
 
+            if (row[0] !== ``) {
 
-    })
+                //video title
+                ele = popEle({e:`ul`, i:`tree`, p:document.getElementById('treeRoot')})
+                ele2 = popEle({e: `li`, p:ele})
+                ele = popEle({e: `span`, i:row[0], c:`title`, t:row[0], p:ele2})
+                ele.dataset.url = row[3]
+                ele.setAttribute(`url`, row[3])
+                ele.addEventListener("click", (e) => toggle(e))
 
-    console.log(res.ok)
+                ele2 = popEle({e: `ul`, c:`nested`, p:ele.parentElement})
+                ele2 = popEle({e: `li`, p:ele2})
+                ele = popEle({e: `span`, i:`root`, c:`desc`, t:row[1], p:ele2})
 
-    let data = await res.text()
+                continue
+            }
+                ele2 = popEle({e: `ul`, c:`nested`, p:ele.parentElement})
+                ele2 = popEle({e: `li`, p:ele2})
+                ele = popEle({e: `span`, i:row[2], c:`index`, t:row[1], p:ele2})
+                ele.addEventListener('click', (e) =>{
+                    if (document.getElementById(`video`).src !== e.target.dataset.url) document.getElementById(`video`).src = document.getElementById(currentId).dataset.url
+                    document.getElementById(`video`).currentTime = e.target.id
+                    e.stopPropagation()
+                 })
+        }
+
+      }
+      catch(err){
+        console.trace()
+        console.log(err)
+      }
+
+    })()
+
+    // console.log(res.ok)
+
+    // let data = await res.text()
 
     // let res = await fetch(`./json/videosList.json`)
     // let data = await res.text()
   
-    let videosList = JSON.parse(data)
-    const {list} = videosList
+    // let videosList = JSON.parse(data)
+    // const {list} = videosList
 
-    list.map((item) => {
+    // list.map((item) => {
 
-        let ele = popEle({e:`h1`, c:`title`, i:item.title, t:item.title, p:document.getElementById('treeContainer')})
-        ele.addEventListener('click', popVideoTitles)
-    })
-  })()
+    //     let ele = popEle({e:`h1`, c:`title`, i:item.title, t:item.title, p:document.getElementById('treeContainer')})
+    //     ele.addEventListener('click', popVideoTitles)
+    // })
+//   })()
 

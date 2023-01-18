@@ -33,9 +33,23 @@ app.get('/', async (req, res) => {res.send(`TagLinker Library Server`)})
 
 app.get('/debug', async (req, res) => {
 
+    res.sendFile(`${__dirname}/tree.html`);
+
+})
+
+
+app.get('/indexer', async (req, res) => {
+
     res.sendFile(`${__dirname}/videoIndexer.html`);
 
 })
+
+app.get('/viewer', async (req, res) => {
+
+    res.sendFile(`${__dirname}/videoViewer.html`);
+
+})
+
 
 //get a fresh access token
 const getAccessToken = async() => {

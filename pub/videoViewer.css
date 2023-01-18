@@ -5,10 +5,10 @@
 
     --itemIcon: url("./img/folderClosed24.png");
     --itemOpenIcon: url("./img/folderOpened24.png");
-    --indexIcon: url("./img/index128.png");
+    --indexIcon: url("./img/index32.png");
     --bookmarkIcon: url("./img/bookmark24.png");
     --downloadIcon: url("./img/download128.png");
-    --saveIcon: url("./img/sheet128.png");
+    --saveIcon: url("./img/sheet32.png");
 }
 
 
@@ -35,6 +35,13 @@
 
   }
 
+  .treeRoot{
+    margin-left: 10px;
+    color: aquamarine;
+    font-size: 1.5em;
+   }
+ 
+
 .videoContainer{
     background-color: rgb(16, 16, 90);
     grid-row-start: 2;
@@ -46,6 +53,24 @@
     justify-content: center;
   }
 
+  .nested {
+    display: none;
+  }
+  
+  .active {
+    display: block;
+  }
+  
+  .title{
+    display: flex;
+    align-items: center;
+    margin-left: 5px;
+    font-size: 16px;
+    color: rgb(255, 255, 255);
+    cursor: pointer;
+    user-select: none;
+   }
+
   .video {
 
     width: 100%;
@@ -53,25 +78,19 @@
 
   }
 
-  .title {
-
-    font-size: 1em;
-    color:aquamarine;
-    margin-left: 10px;
-  }
-
 
   .title:hover {
 
-    color:white;
+    color:yellow;
     cursor: pointer;
   }
 
 
 
   .desc {
-
-    font-size: .9em;
+    display: flex;
+    align-items: center;
+    font-size: .6em;
     color:chocolate;
     margin-left: 15px;
   }
@@ -86,15 +105,22 @@
     margin-left: 20px;
   }
 
-  .timeDesc {
-    font-size: .8em;
+  .index {
+    display: flex;
+    align-items: center;
+    font-size: .5em;
     color:gray;
     margin-left: 20px;
   }
 
-  .timeDesc:hover {
+
+
+
+  .index:hover {
 
     color:white;
     cursor: pointer;
 
   }
+
+  .index:before {content: var(--indexIcon);}

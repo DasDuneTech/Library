@@ -30,7 +30,7 @@ document.getElementById(`videoTitle`).addEventListener('change', async() =>{
 
           document.getElementById(`videoUrl`).value = row[3]
           document.getElementById(`video`).src = document.getElementById(`videoUrl`).value
-          popEle({e:`input`, c:`videoDesc`, v:row[1], p:document.getElementById('treeContainer')})
+          popEle({e:`input`, c:`desc`, v:row[1], p:document.getElementById('treeContainer')})
           videoDescDone = true
           indexStart = videosListArr.indexOf(row)
           arrPrefix = videosListArr.slice(0, indexStart)
@@ -39,7 +39,7 @@ document.getElementById(`videoTitle`).addEventListener('change', async() =>{
         }
 
         //process all the chapters
-        if (row[0] !==``) {
+        if (row[0] !== ``) {
           arrSuffix =videosListArr.slice(videosListArr.indexOf(row))
           return
         }
