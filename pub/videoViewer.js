@@ -4,26 +4,26 @@ import {popEle} from './lib/lib.js'
 // let serverUrl = `https://library-qm2c6ml5ua-uc.a.run.app`
 // let serverUrl = `http://localhost:8080`
 let videosListArr = []
-let ele, ele2, ele3
+let ele, ele2, ele3, eleTopic
 let currentId
 
 let serverUrl = location.origin
 
 const topicClick = async(e) => {
 
-    popTitles(e)
+    await popTitles(e)
     toggle(e)
 
 }
 
  //folders tree toggle function on click event
 let toggle = async(e) => {
-    [...e.target.parentElement.querySelectorAll(".nested")].map( i => i.classList.toggle("active"))
+    e.target.parentElement.querySelector(".nested").classList.toggle("active")
     if (e.target.nextSibling.className.includes(`active`)) {
         currentId = e.target.id
         if (document.getElementById(`video`).src !== e.target.dataset.url) document.getElementById(`video`).src = e.target.dataset.url
     }
-    console.log(`stop`)
+    e.stopPropagation()
     // let toggleType = `item-clicked`
     // e.target.classList.toggle(toggleType)
   }
@@ -39,29 +39,27 @@ const popTitles = async(e) => {
     data.values.shift()
     videosListArr = data.values
 
-    ele = popEle({e:`ul`, c:`nested`, p:e.target.parentElement})
+    eleTopic = popEle({e:`ul`, c:`nested`, p:e.target.parentElement})
 
     for (let row of videosListArr) {
 
         if (row[0] !== ``) {
 
             //video title
-            ele2 = popEle({e: `li`, p:ele})
-            popEle({e: `span`, i:row[0], c:`title`, t:row[0], p:ele2})
+            ele2 = popEle({e: `li`, p:eleTopic})
+            ele = popEle({e: `span`, i:row[0], c:`title ${row[0]}`, t:row[0], p:ele2})
             ele.dataset.url = row[3]
             ele.addEventListener("click", (e) => toggle(e))
 
-            ele2 = popEle({e: `ul`, c:`nested`, p:ele.parentElement})
-            ele2 = popEle({e: `li`, p:ele2})
-            ele = popEle({e: `span`, i:`root`, c:`desc`, t:row[1], p:ele2})
-
+            ele3 = popEle({e: `ul`, c:`nested`, p:ele2})
+            popEle({e: `li`, c:`desc`, t:row[1], p:ele3})
             continue
         }
-            ele2 = popEle({e: `ul`, c:`nested`, p:ele.parentElement})
-            ele2 = popEle({e: `li`, p:ele2})
-            ele = popEle({e: `span`, i:row[2], c:`index`, t:row[1], p:ele2})
+            // ele2 = popEle({e: `ul`, c:`nested`, p:ele.parentElement})
+            ele= popEle({e: `li`, i:row[2], c:`index`, t:row[1], p:ele3})
+            // ele = popEle({e: `span`, i:row[2], c:`index`, t:row[1], p:ele2})
             ele.addEventListener('click', (e) =>{
-                if (document.getElementById(`video`).src !== e.target.dataset.url) document.getElementById(`video`).src = document.getElementById(currentId).dataset.url
+                if (document.getElementById(`video`).src !== e.target.dataset.url) document.getElementById(`video`).src = e.target.parentElement.previousSibling.dataset.url
                 document.getElementById(`video`).currentTime = e.target.id
                 e.stopPropagation()
             })
@@ -158,9 +156,11 @@ const init = (async() => {
 
             //library topics
             // ele = popEle({e:`ul`, i:`tree`, p:document.getElementById('treeRoot')})
-            ele = popEle({e: `li`, p:document.getElementById('treeRoot')})
-            popEle({e: `span`, i:row.properties.title, c:`topic`, t:row.properties.title, p:ele2})
+            ele = popEle({e: `li`, i:`Microsoft`, p:document.getElementById('treeRoot')})
+            popEle({e: `span`, i:row.properties.title, c:`topic ${row.properties.title}`, t:row.properties.title, p:ele})
             ele.addEventListener("click", (e) => topicClick(e))
+
+
         }
     }
     catch(err){

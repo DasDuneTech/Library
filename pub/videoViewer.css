@@ -5,10 +5,15 @@
 
     --itemIcon: url("./img/folderClosed24.png");
     --itemOpenIcon: url("./img/folderOpened24.png");
-    --indexIcon: url("./img/index32.png");
     --bookmarkIcon: url("./img/bookmark24.png");
     --downloadIcon: url("./img/download128.png");
     --saveIcon: url("./img/sheet32.png");
+    --MicrosoftIcon: url("./img/microsoft24.png");
+    --GoogleIcon: url("./img/google24.png");
+    --OneDriveIcon: url("./img/onedrive24.png");
+    --indexIcon: url("./img/index16.png");
+    --AzureIcon: url("./img/azure16.png");
+
 }
 
 
@@ -28,24 +33,25 @@
 }
 
 .treeContainer{
-    grid-row: 2;
+    grid-row-start: 2;
+    grid-row-end: 7;
     grid-column: 1;
     display: grid;
-    align-content: center;
+    overflow: auto;
 
   }
 
   .treeRoot{
     margin-left: 10px;
     color: wheat;
-    font-size: 1.5em;
+    font-size: 1em;
    }
  
 
 .videoContainer{
     background-color: rgb(16, 16, 90);
     grid-row-start: 2;
-    grid-row-end: 6;
+    grid-row-end: 7;
     /* grid-row: span 2; */
     grid-column: span 5;
     display: grid;
@@ -61,21 +67,44 @@
     display: block;
   }
 
+  li {list-style: none;}
+
+  .Google::before {
+    content: var(--GoogleIcon);
+    padding-right: 2px;
+   }
+
+  .Microsoft::before {
+    content: var(--MicrosoftIcon);
+    padding-right: 2px;
+  }
+
+  .OneDrive::before {
+    content: var(--OneDriveIcon);
+    padding-right: 2px;
+  }
+
+  .Azure::before {
+    content: var(--AzureIcon);
+    padding-right: 2px;
+  }
+
+
   .topic{
     display: flex;
     align-items: center;
     margin-left: 5px;
-    font-size: .8em;
-    color: rgb(33, 100, 209);
+    font-size: 1em;
+    color: rgb(96, 130, 185);
     cursor: pointer;
     user-select: none;
    }
-  
-  .title{
+
+   .title{
     display: flex;
     align-items: center;
     margin-left: 10px;
-    font-size: .6em;
+    font-size: .8em;
     color: rgb(33, 169, 187);
     cursor: pointer;
     user-select: none;
@@ -100,9 +129,9 @@
   .desc {
     display: flex;
     align-items: center;
-    font-size: .5em;
+    font-size: .6em;
     color:chocolate;
-    margin-left: 15px;
+    margin-left: 20px;
   }
 
 
@@ -118,9 +147,9 @@
   .index {
     display: flex;
     align-items: center;
-    font-size: .5em;
+    font-size: .6em;
     color:gray;
-    margin-left: 20px;
+    margin-left: 25px;
   }
 
 
