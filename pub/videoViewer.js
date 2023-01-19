@@ -10,8 +10,10 @@ let currentId
 let serverUrl = location.origin
 
 const topicClick = async(e) => {
-    toggle(e)
+
     popTitles(e)
+    toggle(e)
+
 }
 
  //folders tree toggle function on click event
@@ -37,16 +39,16 @@ const popTitles = async(e) => {
     data.values.shift()
     videosListArr = data.values
 
+    ele = popEle({e:`ul`, c:`nested`, p:e.target.parentElement})
+
     for (let row of videosListArr) {
 
         if (row[0] !== ``) {
 
             //video title
-            ele3 = popEle({e:`ul`, i:`tree`, c:`nested`, p:e.target.parentElement})
-            ele2 = popEle({e: `li`, p:ele3})
-            ele = popEle({e: `span`, i:row[0], c:`title`, t:row[0], p:ele2})
+            ele2 = popEle({e: `li`, p:ele})
+            popEle({e: `span`, i:row[0], c:`title`, t:row[0], p:ele2})
             ele.dataset.url = row[3]
-            ele.setAttribute(`url`, row[3])
             ele.addEventListener("click", (e) => toggle(e))
 
             ele2 = popEle({e: `ul`, c:`nested`, p:ele.parentElement})
@@ -155,9 +157,9 @@ const init = (async() => {
         for (let row of data.sheets) {
 
             //library topics
-            ele = popEle({e:`ul`, i:`tree`, p:document.getElementById('treeRoot')})
-            ele2 = popEle({e: `li`, p:ele})
-            ele = popEle({e: `span`, i:row.properties.title, c:`topic`, t:row.properties.title, p:ele2})
+            // ele = popEle({e:`ul`, i:`tree`, p:document.getElementById('treeRoot')})
+            ele = popEle({e: `li`, p:document.getElementById('treeRoot')})
+            popEle({e: `span`, i:row.properties.title, c:`topic`, t:row.properties.title, p:ele2})
             ele.addEventListener("click", (e) => topicClick(e))
         }
     }
