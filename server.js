@@ -83,19 +83,41 @@ const getAccessToken = async() => {
 
 }
 
-//get sheet info
-app.get('/getSheetsValues', async (req, res) => {
 
-    let range = req.query.range
+//get sheet values
+app.get('/getSheetsList', async (req, res) => {
 
     try {
 
         let sheetsId= `1SjOk0X2rIYs6UBaGP2k_JCeJpx9H5ZgibIErgQHp1tU`
-        let sheetName = `Library`
-        let range2 = range === undefined ? `` : `!${range}`
+        let url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsId}`
+
+        let resp = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token.access_token}});
+        let data  = await resp.json()
+        if (!resp.ok) throw `Cannot get the sheet's values sheet :: ${resp.statusText}`
+        res.send(data)
+    }
+    catch(err) {
+        console.log(err.message)
+        res.send(err.message)
+    }
+})
+
+
+
+//get sheet values
+app.get('/getSheetsValues', async (req, res) => {
+
+    let sheetName = req.query.sheetName
+
+    try {
+
+        let sheetsId= `1SjOk0X2rIYs6UBaGP2k_JCeJpx9H5ZgibIErgQHp1tU`
+        // let sheetName = `Library`
+        let range = ``
         let formulas = `?valueRenderOption=FORMULA`
 
-        let url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsId}/values/${sheetName}${range2}${formulas}`
+        let url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetsId}/values/${sheetName}${range}${formulas}`
 
         let resp = await fetch(`${url}`, {headers: {Authorization: 'Bearer ' + token.access_token}});
         let data  = await resp.json()

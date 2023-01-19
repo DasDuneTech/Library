@@ -37,7 +37,7 @@
 
   .treeRoot{
     margin-left: 10px;
-    color: aquamarine;
+    color: wheat;
     font-size: 1.5em;
    }
  
@@ -60,13 +60,24 @@
   .active {
     display: block;
   }
+
+
+  .topic{
+    display: flex;
+    align-items: center;
+    margin-left: 5px;
+    font-size: .8em;
+    color: rgb(33, 100, 209);
+    cursor: pointer;
+    user-select: none;
+   }
   
   .title{
     display: flex;
     align-items: center;
-    margin-left: 5px;
-    font-size: 16px;
-    color: rgb(255, 255, 255);
+    margin-left: 10px;
+    font-size: .6em;
+    color: rgb(33, 169, 187);
     cursor: pointer;
     user-select: none;
    }
@@ -90,7 +101,7 @@
   .desc {
     display: flex;
     align-items: center;
-    font-size: .6em;
+    font-size: .5em;
     color:chocolate;
     margin-left: 15px;
   }
