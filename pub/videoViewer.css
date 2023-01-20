@@ -98,7 +98,7 @@
     display: flex;
     align-items: center;
     margin-left: 5px;
-    font-size: 1em;
+    font-size: 1rem;
     color: rgb(96, 130, 185);
     cursor: pointer;
     user-select: none;
@@ -108,7 +108,7 @@
     display: flex;
     align-items: center;
     margin-left: 10px;
-    font-size: .8em;
+    font-size: .8rem;
     color: rgb(33, 169, 187);
     cursor: pointer;
     user-select: none;
@@ -133,7 +133,7 @@
   .desc {
     display: flex;
     align-items: center;
-    font-size: .6em;
+    font-size: .6rem;
     color:chocolate;
     margin-left: 20px;
     padding-bottom: 2px;
@@ -152,7 +152,7 @@
   .index {
     display: flex;
     align-items: center;
-    font-size: .6em;
+    font-size: .6rem;
     color:gray;
     margin-left: 25px;
   }
