@@ -12,6 +12,8 @@
     --OneDriveIcon: url("./img/onedrive24.png");
     --indexIcon: url("./img/index24.png");
     --AzureIcon: url("./img/azure24.png");
+    --GitHubIcon: url("./img/github48.png");
+    --GraftIcon: url("./img/graph48.png");
 
 }
 
@@ -19,7 +21,7 @@
 /* Grid container  */
 .container{
     display: grid;
-    grid-template-columns: 1.5fr 1fr 1fr 1fr .1fr 1fr;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr 1fr;
     grid-template-rows: .5fr 1fr 1fr 1fr 1fr 1fr;
     grid-gap: 3px;
   
@@ -88,6 +90,15 @@
     padding-right: 2px;
   }
 
+  .GitHub::before {
+    content: var(--GitHubIcon);
+    padding-right: 2px;
+  }
+
+  .Graph::before {
+    content: var(--GraftIcon);
+    padding-right: 2px;
+  }
 
   .topic{
     display: flex;
@@ -152,6 +163,7 @@
     margin-left: 25px;
     padding-top: 2px;
     padding-bottom: 2px;
+    padding-right: 2px;
   }
 
 
@@ -167,5 +179,46 @@
   .index:before {
     content: var(--indexIcon);
     padding-right: 2px;
+  }
+
+  /* .linksContainer{
+    grid-row: 1;
+    grid-column-start: 2;
+    grid-column-end: 7;
+
+  } */
+
+
+
+  .link1Box {
+    display: flex;
+    align-items: center;
+    grid-row: 1;
+    grid-column: 3;
+
+  }
+
+  .link2Box {
+    display: flex;
+    align-items: center;
+    grid-row: 1;
+    grid-column: 4;
+
+  }
+
+  .link3Box {
+    display: flex;
+    align-items: center;
+    grid-row: 1;
+    grid-column: 5;
+
+  }
+
+  .link4Box {
+    display: flex;
+    align-items: center;
+    grid-row: 1;
+    grid-column: 6;
+
   }
     

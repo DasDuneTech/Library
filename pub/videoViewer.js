@@ -1,8 +1,6 @@
 //common library
 import {popEle} from './lib/lib.js'
 
-// let serverUrl = `https://library-qm2c6ml5ua-uc.a.run.app`
-// let serverUrl = `http://localhost:8080`
 let videosListArr = []
 let ele, ele2, ele3, eleTopic
 let currentId
@@ -13,8 +11,14 @@ const topicClick = async(e) => {
 
     await popTitles(e)
     toggle(e)
-
 }
+
+const titleClick = (e) => {
+
+    popLinks(e)
+    toggle(e)
+}
+
 
  //folders tree toggle function on click event
 let toggle = async(e) => {
@@ -24,8 +28,6 @@ let toggle = async(e) => {
         if (document.getElementById(`video`).src !== e.target.dataset.url) document.getElementById(`video`).src = e.target.dataset.url
     }
     e.stopPropagation()
-    // let toggleType = `item-clicked`
-    // e.target.classList.toggle(toggleType)
   }
 
 const popTitles = async(e) => {
@@ -45,19 +47,37 @@ const popTitles = async(e) => {
 
         if (row[0] !== ``) {
 
-            //video title
+            //video title code
             ele2 = popEle({e: `li`, p:eleTopic})
             ele = popEle({e: `span`, i:row[0], c:`title ${row[0]}`, t:row[0], p:ele2})
             ele.dataset.url = row[3]
-            ele.addEventListener("click", (e) => toggle(e))
+            ele.addEventListener("click", (e) => titleClick(e))
 
             ele3 = popEle({e: `ul`, c:`nested`, p:ele2})
             popEle({e: `li`, c:`desc`, t:row[1], p:ele3})
+
+            row.splice(0,4)
+            ele.dataset.links = row
+
+            // for (let link of row) {
+         
+            //     ele= popEle({e: `div`, c:`link${row.indexOf(link)+1}Box`, p:document.getElementById(`container`)})
+            //     ele2 = popEle({e: `a`, p:ele})
+            //     ele2.href = `${link.split(`\n`)[1]}`
+            //     popEle({e: `i`, c:`${link.split(`\n`)[0]}`, p:ele2})
+
+            // }
+
+            console.log(row)
+
+
+
+            //* test
+
             continue
         }
-            // ele2 = popEle({e: `ul`, c:`nested`, p:ele.parentElement})
+            // rest of the video info after title
             ele= popEle({e: `li`, i:row[2], c:`index`, t:row[1], p:ele3})
-            // ele = popEle({e: `span`, i:row[2], c:`index`, t:row[1], p:ele2})
             ele.addEventListener('click', (e) =>{
                 if (document.getElementById(`video`).src !== e.target.dataset.url) document.getElementById(`video`).src = e.target.parentElement.previousSibling.dataset.url
                 document.getElementById(`video`).currentTime = e.target.id
@@ -66,82 +86,23 @@ const popTitles = async(e) => {
     }
 }
 
+const popLinks = async(e) => {
 
-const popVideoTitles = async(e) => {
+    let parent = document.getElementById('container')
+    while (parent.children.length > 2) {parent.removeChild(parent.children[2])}
 
-    if (e.target.className !== `title`) return
-    if (e.target.children.length !== 0) {
-        
-        if (document.getElementById(`video`).src !== e.target.dataset.url) document.getElementById(`video`).src = e.target.dataset.url
-        return 
-    }
+    let linksStr =  e.target.dataset.links
+    let linksArr = linksStr.split(`,`)
 
-    let title = e.target.textContent
-
-    let isTitleExists = false
-    let videoDescDone = false
-
-    for (let row of videosListArr) {
-
-        if (row[0] === title || isTitleExists) 
-        {
-          isTitleExists = true
-
-            //process video desc only once
-            if (row[0] !==`` && !videoDescDone) 
-                {
-                    document.getElementById(`video`).src = row[3]
-                    popEle({e:`h2`, c:`desc`, t:row[1], p:e.target})
-                    videoDescDone = true
-                    continue
-                }
-
-            //process all the chapters
-            if (row[0] !== ``) return
-            // let ele = popEle({e:`div`, c:`timeInfo`, p:e.target})
-            // popEle({e:`h3`, c:`time`, t:item.time, p:ele})
-            let ele = popEle({e:`h3`, i:row[2], c:`timeDesc`, t:row[1], p:e.target})
-            ele.addEventListener('click', (e) =>{
-                if (document.getElementById(`video`).src !== e.target.dataset.url) document.getElementById(`video`).src = e.target.parentElement.dataset.url
-                document.getElementById(`video`).currentTime = e.target.id
-                e.stopPropagation()
-             })
-        }
-    }
-
-
-
-    // let res = await fetch(`./json/${e.target.textContent}.json`)
-    //     let data = await res.text()
-
-    //     let videoInfo = JSON.parse(data)
-    //     const {url, desc, indexes} = videoInfo
-
-    //     document.getElementById(`video`).src = url
-
-    //     let ele = popEle({e:`h2`, c:`desc`, t:desc, p:document.getElementById(e.target.id)})
-    //     // let ele2 = popEle({e:`div`, c:`timeInfo`, p:document.getElementById('test')})
-
-    //     indexes.map((item) => {
-
-    //         ele = popEle({e:`div`, c:`timeInfo`, p:document.getElementById(e.target.id)})
-    //         // popEle({e:`h3`, c:`time`, t:item.time, p:ele})
-    //         ele = popEle({e:`h3`, c:`timeDesc`, t:item.desc, p:ele})
-    //         ele.addEventListener('click', (e) =>{
-    //             document.getElementById(`video`).currentTime = item.time
-    //             e.stopPropagation()
-    //          })
-        
-
-    //     })
-
-        // popEle({e:`h3`, c:`time`, t:`1`, p:ele2})
-        // popEle({e:`h3`, c:`timeDesc`, t:`Chapter 1`, p:ele2})
+        for (let link of linksArr) {
     
+        ele= popEle({e: `div`, c:`link${linksArr.indexOf(link)+1}Box`, p:document.getElementById(`container`)})
+        ele2 = popEle({e: `a`, p:ele})
+        ele2.href = `${link.split(`\n`)[1]}`
+        popEle({e: `i`, c:`${link.split(`\n`)[0]}`, p:ele2})
 
-
-        // console.log(data)
-};
+    }
+}
 
 const init = (async() => {
 
@@ -154,13 +115,9 @@ const init = (async() => {
 
         for (let row of data.sheets) {
 
-            //library topics
-            // ele = popEle({e:`ul`, i:`tree`, p:document.getElementById('treeRoot')})
             ele = popEle({e: `li`, i:`Microsoft`, p:document.getElementById('treeRoot')})
             popEle({e: `span`, i:row.properties.title, c:`topic ${row.properties.title}`, t:row.properties.title, p:ele})
             ele.addEventListener("click", (e) => topicClick(e))
-
-
         }
     }
     catch(err){
@@ -168,7 +125,7 @@ const init = (async() => {
     console.log(err)
     }
 
-    })()
+})()
 
 
 
