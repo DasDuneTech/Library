@@ -1,7 +1,11 @@
+@import url('https://fonts.googleapis.com/css2?family=Armata&family=Roboto&display=swap');
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css');
 @import "./lib/lib.css";
 
 /* variables */
 :root {
+
+    font-size: 16px;
 
     --itemIcon: url("./img/folderClosed24.png");
     --itemOpenIcon: url("./img/folderOpened24.png");
@@ -10,7 +14,7 @@
     --saveIcon: url("./img/sheet32.png");
     --MicrosoftIcon: url("./img/microsoft24.png");
     --GoogleIcon: url("./img/google24.png");
-    --OneDriveIcon: url("./img/onedrive24.png");
+    --OneDriveIcon: url("./img/onedrive16.png");
     --indexIcon: url("./img/index16.png");
     --AzureIcon: url("./img/azure16.png");
 
@@ -132,6 +136,7 @@
     font-size: .6em;
     color:chocolate;
     margin-left: 20px;
+    padding-bottom: 2px;
   }
 
 
@@ -162,4 +167,8 @@
 
   }
 
-  .index:before {content: var(--indexIcon);}
+  .index:before {
+    content: var(--indexIcon);
+    padding-right: 2px;
+  }
+    
