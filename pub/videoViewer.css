@@ -5,18 +5,13 @@
 /* variables */
 :root {
 
-    font-size: 16px;
+    font-size: 24px;
 
-    --itemIcon: url("./img/folderClosed24.png");
-    --itemOpenIcon: url("./img/folderOpened24.png");
-    --bookmarkIcon: url("./img/bookmark24.png");
-    --downloadIcon: url("./img/download128.png");
-    --saveIcon: url("./img/sheet32.png");
-    --MicrosoftIcon: url("./img/microsoft24.png");
+    --MicrosoftIcon: url("./img/microsoft36.png");
     --GoogleIcon: url("./img/google24.png");
-    --OneDriveIcon: url("./img/onedrive16.png");
-    --indexIcon: url("./img/index16.png");
-    --AzureIcon: url("./img/azure16.png");
+    --OneDriveIcon: url("./img/onedrive24.png");
+    --indexIcon: url("./img/index24.png");
+    --AzureIcon: url("./img/azure24.png");
 
 }
 
