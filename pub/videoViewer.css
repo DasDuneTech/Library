@@ -19,7 +19,7 @@
 /* Grid container  */
 .container{
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr .1fr 1fr;
+    grid-template-columns: 1.5fr 1fr 1fr 1fr .1fr 1fr;
     grid-template-rows: .5fr 1fr 1fr 1fr 1fr 1fr;
     grid-gap: 3px;
   
@@ -129,9 +129,9 @@
     display: flex;
     align-items: center;
     font-size: .6rem;
-    color:chocolate;
+    color:sandybrown;
     margin-left: 20px;
-    padding-bottom: 2px;
+    /* padding-bottom: 2px; */
   }
 
 
@@ -148,8 +148,10 @@
     display: flex;
     align-items: center;
     font-size: .6rem;
-    color:gray;
+    color:wheat;
     margin-left: 25px;
+    padding-top: 2px;
+    padding-bottom: 2px;
   }
 
 
