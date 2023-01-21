@@ -10,10 +10,15 @@
     --MicrosoftIcon: url("./img/microsoft36.png");
     --GoogleIcon: url("./img/google24.png");
     --OneDriveIcon: url("./img/onedrive24.png");
+    --OneDriveLinkIcon: url("./img/onedrive48.png");
     --indexIcon: url("./img/index24.png");
     --AzureIcon: url("./img/azure24.png");
     --GitHubIcon: url("./img/github48.png");
     --GraftIcon: url("./img/graph48.png");
+    --docMSIcon: url("./img/docMS48.png");
+    --msAppRegIcon: url("./img/msAppReg48.png");
+    --msAccountIcon: url("./img/msAccount48.png");
+    --sheetsIcon: url("./img/sheets24.png");
 
 }
 
@@ -32,6 +37,36 @@
   
     height: 100vh;
 }
+
+.headerContainer {
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  grid-row: 1;
+  grid-column-start: 1;
+  grid-column-end: 2;
+
+}
+
+.header{
+  display: flex;
+  align-items: center;
+  font-size: 1rem; 
+  color:antiquewhite;
+
+}
+
+.header::before{
+  padding-right: 2px;
+  content: var(--sheetsIcon);
+  }
+
+.header:hover{
+cursor: pointer;
+}
+   
+ 
 
 .treeContainer{
     grid-row-start: 2;
@@ -85,6 +120,11 @@
     padding-right: 2px;
   }
 
+  .OneDriveLink::before {
+    content: var(--OneDriveLinkIcon);
+    padding-right: 2px;
+  }
+
   .Azure::before {
     content: var(--AzureIcon);
     padding-right: 2px;
@@ -99,6 +139,23 @@
     content: var(--GraftIcon);
     padding-right: 2px;
   }
+
+  .docMS::before {
+    content: var(--docMSIcon);
+    padding-right: 2px;
+  }
+
+  .msAppReg::before {
+    content: var(--msAppRegIcon);
+    padding-right: 2px;
+  }
+
+  .msAccount::before {
+    content: var(--msAccountIcon);
+    padding-right: 2px;
+  }
+
+
 
   .topic{
     display: flex;

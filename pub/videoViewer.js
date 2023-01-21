@@ -106,6 +106,8 @@ const popLinks = async(e) => {
 
 const init = (async() => {
 
+    document.getElementById(`header`).addEventListener('click', (e) =>{window.open("https://docs.google.com/spreadsheets/d/1r5hSM6ZJdZmsAdKu8bRKQ3qamkq9kLAV5KVKdFW86KQ/edit#gid=0")})
+
     try {
 
         //get topics tree list (sheet name)
