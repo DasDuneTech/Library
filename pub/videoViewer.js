@@ -89,7 +89,7 @@ const popTitles = async(e) => {
 const popLinks = async(e) => {
 
     let parent = document.getElementById('container')
-    while (parent.children.length > 2) {parent.removeChild(parent.children[2])}
+    while (parent.children.length > 3) {parent.removeChild(parent.children[3])}
 
     let linksStr =  e.target.dataset.links
     let linksArr = linksStr.split(`,`)
