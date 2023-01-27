@@ -12,7 +12,7 @@
     "tlClient": "./pub/",
     "tlServer": "http://localhost:8080",
     "urlSheetsPrefix": "https://docs.google.com/spreadsheets/d/",
-    "bucket": "gs://taglinker-server.appspot.com",
+    "bucket": "gs://tlclient000000.appspot.com",
     "sep": "-",
     "tagMin": 7,
     "clientCloud": "Google",

@@ -6,7 +6,7 @@ import './firebase-auth.js'
 //*Global variables
 let fireBaseIdToken = ``
 let claims = ``
-
+let idtoken = ``
 
 //*config
 
@@ -35,6 +35,7 @@ const {tlServer, clientCloud, FBInit} =  config
 //firebase stuff
 firebase.initializeApp(FBInit);
 const auth = firebase.auth();
+let authProvider = new firebase.auth.GoogleAuthProvider();
 
 
 //*functions
@@ -50,7 +51,9 @@ auth.onAuthStateChanged(cred => {
       auth.currentUser
         .getIdToken()
         .then((idToken) => {
-          fireBaseIdToken = idToken
+          const idTokenEvent = new CustomEvent('idToken', {detail: {idToken: idToken}});
+          document.dispatchEvent(idTokenEvent);
+          idtoken= idToken
         })
         .catch((err) => console.log(err.message));
     }
@@ -63,7 +66,9 @@ auth.onAuthStateChanged(cred => {
           auth.currentUser
             .getIdToken()
             .then((idToken) => {
-              fireBaseIdToken = idToken
+              const idTokenEvent = new CustomEvent('idToken', {detail: {idToken: idToken}});
+              document.dispatchEvent(idTokenEvent);
+              idToken = idToken
         })
             .catch((err) => console.log(err.message));
         })
@@ -102,15 +107,32 @@ export const getIdToken= () => {
   return(fireBaseIdToken) 
 }
 
+//get user profile
+export const getUser= async() => { 
 
-//get Id token custom claims
+  let user = await firebase.auth().currentUser
+  return(user)
+
+
+}
+
+
+//get custom claims
 export const getCustomClaims= async() => { 
 
 
-  claims = await auth.verifyIdToken(fireBaseIdToken)
+  claims = await auth.verifyIdToken(idtoken)
   console.log(claims)
 
 
+}
+
+export const snackBar = (msg) => {
+  var x = document.getElementById("snackbar");
+  x.textContent = msg
+  // x.style.backgroundColor = color
+  x.className = "show";
+  setTimeout(function(){ x.className = x.className.replace("show", ""); }, 2900);
 }
 
 

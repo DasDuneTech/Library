@@ -1,0 +1,14 @@
+** goto GCP console and accept terms and conditions
+
+** create project on Firebase/GCP
+firebase projects:create
+
+*create authentication manually with gmail provider
+*create storage manually
+
+**create web app
+firebase apps:create
+
+**get web sdk JSON
+firebase apps:sdkconfig
+

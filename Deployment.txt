@@ -1,0 +1,97 @@
+1. Create a google account 
+1.1 Goto GCP console and accept Terms of Services
+1.2 Login with this google account on gcloud cli --> gcloud auth login 
+2. Create a GCP/Firebase Project
+2.1 gcloud cli --> gcloud projects create tlclient000001 --name="tlclient000001"
+2.2 Note : The project will be also created on Firebase
+2.3 Note : The project will not be visible on Firebase, need to click <Create a Project> to see it
+2.4 Goto Firebase console, on the welcome screen, click <Create a Project>, you will see the project
+2.5 Accept Firebase Terms anf follow steps
+2.6 Verify if GCP project exists, gcloud cli --> gcloud projects list
+2.7 Verify if firebase project exists, gcloud cli --> firebase projects:list
+2.8 Set the GCP project as current gcloud cli (optional ?) --> gcloud config set project tlclient000001
+3.  Create a Firebase Web App , keys and firebase-adminsdk service account 
+3.1 Logout from firebase cli if already logged in
+3.2 Login with this google account on firebase cli --> firebase login 
+3.3 Set the firebase project as current firebase cli --> firebase use tlclient000001
+3.4 Verify if your project is current --> firebase projects:list
+3.5 Create the Web App : firebase cli --> firebase apps:sdkconfig
+3.6 You get the App ID and instruction to get the JSON keys (firebase apps:sdkconfig <your App ID>)
+3.7 Copy the JSON to your config.JSON file
+3.8 Note : On GCP the firebase-adminsdk will be created as well (use with Node.JS) 
+4.  Download firebase-adminsdk service account as a JSON file (sa.json)
+4.1 List all the service account : gcloud cli --> gcloud iam service-accounts list
+4.2 Copy the email of firebase-adminsdk service account and use it to download the json file.  
+4.2 gcloud cli --> gcloud iam service-accounts keys create sa.json --iam-account=<service account email>   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+** gcloud core commands
+
+**credentials setup
+gcloud auth login
+gcloud auth configure-docker
+
+** create a project
+gcloud projects create dasdunetest-0001 --name="test" --labels=type=test
+
+** set active project
+gcloud config set project PROJECT_ID
+
+** link a billing account (create a storage bucket require a billing account)
+gcloud billing projects link my-project --billing-account 0X0X0X-0X0X0X-0X0X0X
+
+** create a service account
+gcloud iam service-accounts create taglinker --display-name="TagLinker Service Account"
+
+** list service accounts
+gcloud iam service-accounts list
+
+** create a service account JSON keys (you get the service account details from the list command)
+gcloud iam service-accounts keys create sa.json --iam-account=taglinker@tlclient000000.iam.gserviceaccount.com
+
+** create a service account JSON keys (you get the service account details from the list command)
+** the key will be created with the Firebase Admin SDK service account (created automatically when using Firebase)
+gcloud iam service-accounts keys create sa.json --iam-account=firebase-adminsdk-64bmw@tlclient000000.iam.gserviceaccount.com
+
+**create a storage bucket (need to accept terms and cond. before)
+gcloud storage buckets create gs://tlclient000000
+
+**container registry
+gcloud config set project taglinker-library
+docker tag library gcr.io/taglinker-library/library
+docker push gcr.io/library-taglinker/library
+
+//* Cloud Run create a service
+gcloud run deploy library2 \
+--image=gcr.io/library-d3254/library@sha256:8d4eb4043706b11fe5a6eb0ee4f7f8b55ff0ebd1f5156883ce17c3236d32781a \
+--allow-unauthenticated \
+--service-account=185112099523-compute@developer.gserviceaccount.com \
+--max-instances=30 \
+--region=us-central1 \
+--project=library-d3254
+
+//* Cloud Run deployment (image name will be available after the image push)
+gcloud run deploy library --image gcr.io/library-d3254/library@sha256:8d4eb4043706b11fe5a6eb0ee4f7f8b55ff0ebd1f5156883ce17c3236d32781a
+
+
+**Billing account
+** invite a user client (email) as a Billing Manager role 
+** and browser role [resourcemanager.projects.get]
+https://gcp.permissions.cloud/predefinedroles/browser
+
+
+

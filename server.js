@@ -6,6 +6,18 @@ const FormData = require('form-data');
 const fetch = require('node-fetch');
 require('dotenv').config()
 
+//firebase stuff
+var admin = require('firebase-admin');
+var keys = require("./sa.json");
+admin.initializeApp({
+    credential: admin.credential.cert(keys)
+});
+
+//get the config file
+let config = fs.readFileSync('config.json', 'utf8')
+let configObj = JSON.parse(config)
+const { bucket } = configObj
+
 const port = 8080;
 const appId = process.env.GOOGLE_OAUTH2_APP_ID
 const secret = process.env.GOOGLE_OAUTH2_APP_SECRET
@@ -83,6 +95,32 @@ const getAccessToken = async() => {
     }
 
 }
+
+//get config
+app.get('/config', async(req, res) => {res.sendFile(`${__dirname}/config.html`)})
+
+//set config
+app.post('/setConfig', async (req, res) => {
+
+    // const {config} = req.body
+
+    //get the config file
+    let config = fs.readFileSync('config.json', 'utf8')
+    let configObj = JSON.parse(config)
+    const {FBInit} = configObj
+
+    configObj.FBInit = req.body
+    fs.writeFileSync("config.json", JSON.stringify(configObj));
+    fs.writeFileSync("./pub/config.json", JSON.stringify(configObj));
+
+
+
+    console.log(config)
+})
+
+//get config
+app.get('/getUser', async (req, res) => {res.sendFile(`${__dirname}/getUser.html`)})
+
 
 
 //get sheet values
@@ -203,3 +241,62 @@ app.post('/update', async (req, res) => {
         res.send(err.message)
     }
 })
+
+
+app.get('/admin', async(req, res) => {res.sendFile(`${__dirname}/setAdmin.html`)})
+
+app.post('/setAdmin', async(req, res) => {
+
+    // const {uid} = req.body
+
+    // claims = await admin.auth().verifyIdToken(req.body.idToken)
+    // console.log(`access: ${claims.access}`)
+
+    let usersList = await admin.auth().listUsers()
+
+
+
+    let result = await admin.auth().setCustomUserClaims(req.body.uid, {access: `admin`})
+    claims = await admin.auth().verifyIdToken(req.body.idToken)
+    console.log(`access: ${claims.access}`)
+
+
+    console.log(`access: ${claims.access}`)
+
+})
+
+
+app.get('/setAccessLevel', async(req, res) => {
+
+    const idToken = app.locals.token
+    app.locals.token = undefined 
+
+    if (idToken !== undefined) claims = await admin.auth().verifyIdToken(idToken)
+    else return
+    
+    if (claims.access !== 'admin') {
+        res.send(`access denied.`)
+        return
+    }
+
+    let idTokenClient = ''
+    usersInfo.map((user)=>{if (user.uid === req.query.uid) idTokenClient = user.idToken})
+
+    claims = await admin.auth().verifyIdToken(idTokenClient)
+    return(claims.access)
+
+});
+
+
+app.get('/uploadFile', async(req, res) => {
+
+    //Upload to Google cloud storage
+    await admin.storage().bucket(bucket).upload(`${__dirname}/test.html`, { destination: `test.html` })
+    console.log('done')
+
+})
+
+
+
+
+
